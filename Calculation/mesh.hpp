@@ -38,7 +38,7 @@ public:
 	double getSe();
 };
 
-/*
+
 class Time {//時間軸
 private:
 	double ntime_;//nステップでの時刻
@@ -48,6 +48,7 @@ private:
 	vector<double> t;
 	TimeP& tparam;
 public:
+
 	Time(TimeP& TP);
 	//ゲッタ
 	double ntime(int n);
@@ -59,17 +60,20 @@ public:
 	double& operator[](int n);
 
 };
-*/
+
+
 class Mesh2d {//計算格子
 	//1: 配列を与えるのではなく, 入力のインデックスに対応する配列の中身を与えるようにする
 	//2:このクラスの役割は計算する空間を定義し, その空間上で物理量の計算を走らせるための諸変数の提供である
 protected:
 
-	NodeP& nparam_;
-	Boundarycond& Bcond_;
+	NodeP nparam_;
+	Boundarycond Bcond_;
 	vector<Node2d> node_;
 	vector<Element2d> elem_;
 	vector<int> ncond_;//節点境界フラグ
+	vector<double> X;
+	vector<double> Y;
 	//境界条件フラグの設定
 	//ncond:  0:内部,	1:剛体壁面(流入流出なし),
 			//2:流入壁面(dirichlet)　3:流出壁面(neumann)
@@ -81,7 +85,7 @@ protected:
 	double xb_, xt_, yb_, yt_, dx_, dy_, Lx_, Ly_;
 	int xnode_, ynode_, xelem_, yelem_, nnode_, nelem_;
 public:
-
+	Mesh2d();
 	Mesh2d(NodeP& NP, Boundarycond& BC);
 	Mesh2d& operator=(const Mesh2d& mesh);
 	Mesh2d(const Mesh2d& mesh);
@@ -120,10 +124,12 @@ public:
 
 	void setup();//初期化
 	virtual void generate();//等間隔グリッドの作成
+
 	//void generate_cylinder_grid();//円柱周りグリッドの作成(後々作成　)
 	//void generate_cavity_grid();//cavity流れ用のグリッド作成(境界条件の情報ncondを書き換えるだけ)
 	//void generate_backstep_grid();//backstep流れ用のグリッド
 };
+
 class CavityMesh2d :public Mesh2d {//キャビティ流れ用のMeshクラス
 public:
 	CavityMesh2d(NodeP& NP, Boundarycond& BC);

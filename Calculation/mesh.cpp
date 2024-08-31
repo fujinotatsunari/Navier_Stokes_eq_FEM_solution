@@ -53,7 +53,7 @@ void Element2d::setSe(double Se_) {
 double Element2d::getSe() {
 	return Se;
 }
-/*
+
 Time::Time(TimeP& Tp) :ntime_(0), dt_(0), nend_(0), nsample_(0), tparam(Tp) {
 	setup();
 }
@@ -85,11 +85,15 @@ double const& Time::operator[](int n)const {
 double& Time::operator[](int n) {
 	return t[n];
 }
-*/
+Mesh2d::Mesh2d() 
+	: Lx_(0), Ly_(0), xb_(0), xt_(0), yb_(0), yt_(0), dx_(0), dy_(0), xnode_(0), ynode_(0), xelem_(0), yelem_(0), nnode_(0), nelem_(0)
+{
+
+}
 Mesh2d::Mesh2d(NodeP& NP, Boundarycond& BC)
 	:nparam_(NP), Bcond_(BC), Lx_(0), Ly_(0), xb_(0), xt_(0), yb_(0), yt_(0), dx_(0), dy_(0), xnode_(0), ynode_(0), xelem_(0), yelem_(0), nnode_(0), nelem_(0)
 {
-	setup();
+	//setup();
 
 }
 Mesh2d& Mesh2d::operator=(const Mesh2d& mesh) {

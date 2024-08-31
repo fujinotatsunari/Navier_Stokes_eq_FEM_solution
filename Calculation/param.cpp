@@ -9,7 +9,7 @@ NodeP::NodeP()
 	:Lx(0), Ly(0), xb(0), xt(0), yb(0), yt(0), dx(0), dy(0), xnode(0), ynode(0), xelem(0), yelem(0), nnode(0), nelem(0)
 {
 	
-	setNodeParam();
+	//setNodeParam();
 }
 NodeP::NodeP(const NodeP& Np) {
 	Lx = Np.Lx;
@@ -75,46 +75,88 @@ void NodeP::setNodeParam() {
 double NodeP::getLx() {
 	return Lx;
 }
+void NodeP::setLx(double lx) {
+	Lx = lx;
+}
 double NodeP::getLy() {
 	return Ly;
+}
+void NodeP::setLx(double ly) {
+	Ly = ly;
 }
 double NodeP::getXb() {
 	return xb;
 }
+void NodeP::setXb(double Xb) {
+	xb = Xb;
+}
 double NodeP::getXt() {
 	return xt;
+}
+void NodeP::setXt(double Xt) {
+	xt = Xt;
 }
 double NodeP::getYb() {
 	return yb;
 }
+void NodeP::setYb(double Yb) {
+	yb = Yb;
+}
 double NodeP::getYt() {
 	return yt;
+}
+void NodeP::setYt(double Yt) {
+	yt = Yt;
 }
 double NodeP::getDx() {
 	return dx;
 }
+void NodeP::setDx(double Dx) {
+	dx = Dx;
+}
 double NodeP::getDy() {
 	return dy;
+}
+void NodeP::setDy(double Dy) {
+	dy = Dy;
 }
 int NodeP::getXnode() {
 	return xnode;
 }
+void NodeP::setXnode(int Xnode) {
+	xnode = Xnode;
+}
 int NodeP::getYnode() {
 	return ynode;
+}
+void NodeP::setYnode(int Ynode) {
+	ynode = Ynode;
 }
 int NodeP::getXelem() {
 	return xelem;
 }
+void NodeP::setXelem(int Xelem) {
+	xelem = Xelem;
+}
 int NodeP::getYelem() {
 	return yelem;
+}
+void NodeP::setYelem(int Yelem) {
+	yelem = Yelem;
 }
 int NodeP::getNnode() {
 	return nnode;
 }
+void NodeP::setNnode(int Nnode) {
+	nnode = Nnode;
+}
 int NodeP::getNelem() {
 	return nelem;
 }
-/*
+void NodeP::setNelem(int Nelem) {
+	nelem = Nelem;
+}
+
 TimeP::TimeP()
 	:dt(0), nend(0), nsample(0) 
 {
@@ -151,7 +193,7 @@ int TimeP::getNend() {
 int TimeP::getNsample () {
 	return nsample;
 }
-*/
+
 Boundarycond::Boundarycond()
 	:flagL(0), flagR(0), flagU(0), flagD(0),flagC(0)
 {

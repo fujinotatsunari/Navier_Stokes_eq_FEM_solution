@@ -17,10 +17,10 @@ protected:
 	//vector<double> y;
 	vector<vector<double>> nodecopy;//Ux,Uy,BCのcsv用の配列
 	vector<vector<double>> elemcopy;//Pのcsv用の配列
-	Mesh2d& mesh;
+	Mesh2d mesh;
 	Velocity2d V;
 	Pressure P;
-	Boundarycond& BC;
+	Boundarycond BC;
 	string dir;//ディレクトリdata_nの位置
 public:
 	OutputData(Mesh2d& Mesh, Boundarycond& Bc, Velocity2d& v, Pressure& p);

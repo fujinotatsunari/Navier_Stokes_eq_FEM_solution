@@ -20,24 +20,38 @@ public:
 	NodeP();
 	NodeP(const NodeP& Np);
 	NodeP& operator=(const NodeP& Np);
-	void setNodeParam();
+	void setNodeParam();//ターミナル入力でパラメータを決める
 	double getLx();
+	void setLx(double lx);
 	double getLy();
+	void setLy(double ly);
 	double getXb();
+	void setXb(double Xb);
 	double getXt();
+	void setXt(double Xt);
 	double getYb();
+	void setYb(double Yb);
 	double getYt();
+	void setYt(double Yt);
 	double getDx();
+	void setDx(double Dx);
 	double getDy();
+	void setDy(double Dy);
 	//double getDxDy();
 	int getXnode();
+	void setXnode(int Xnode);
 	int getYnode();
+	void setYnode(int Ynode);
 	int getXelem();
+	void setXelem(int Xelem);
 	int getYelem();
+	void setYelem(int Yelem);
 	int getNnode();
+	void setNnode(int Nnode);
 	int getNelem();
+	void setNelem(int Nelem);
 };
-/*
+
 class TimeP {//時間軸パラメータクラス
 private:
 	double dt;
@@ -53,7 +67,7 @@ public:
 	int getNsample();
 	void setTparam();
 };
-*/
+
 class Boundarycond {//境界条件クラス
 private:
 	int flagL, flagR, flagU, flagD;//壁面の境界条件
@@ -84,7 +98,14 @@ public:
 	
 };
 
-
+class NDNSparam {//無次元化Navier-Stokes方程式パラメータ
+private:
+	double Re;//レイノルズ数
+public:
+	NDNSparam();
+	double get_Re();
+	void set_Re(double re);
+};
 /*
 class ADeq_param_2d {//一次元移流拡散方程式パラメータクラス
 private:
