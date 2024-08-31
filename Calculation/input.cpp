@@ -159,7 +159,14 @@ void InputData::input_param() {
 	}
 	else {
 		cout << "ファイルが開けませんでした" << endl;
+		exit(-1);
 	}
+
+	nparam.setLx(nparam.getXt() - nparam.getXb());
+	nparam.setLy(nparam.getYt() - nparam.getYb());
+	nparam.setXnode(nparam.getXelem() + 1);
+	nparam.setYnode(nparam.getYelem() + 1);
+
 }
 void InputData::input_mesh() {
 	string filename;
@@ -218,6 +225,7 @@ void InputData::input_mesh() {
 	}
 	else {
 		cout << "ファイルが開けませんでした" << endl;
+		exit(-1);
 	}
 
 	nbool1.resize(nparam.getNelem());
@@ -285,6 +293,7 @@ void InputData::input_csv() {
 		}
 		else {
 			cout << filename << "を開けませんでした" << endl;
+			exit(-1);
 		}
 	}
 

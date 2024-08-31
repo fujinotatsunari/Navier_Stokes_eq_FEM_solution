@@ -1,7 +1,6 @@
 #pragma once
 #include "input.hpp"
 #include "param.hpp"
-#include "mesh.hpp"
 #include <string>
 #include <vector>
 using namespace std;
