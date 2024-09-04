@@ -2,11 +2,7 @@
 #include"param.hpp"
 #include<vector>
 #include<iostream>
-Node2d::Node2d() :no(0), x(0), y(0)
-{
-
-
-}
+Node2d::Node2d() :no(0), x(0), y(0){}
 void Node2d::setNo(int no_) {
 	no = no_;
 }
@@ -25,10 +21,7 @@ void Node2d::setY(double y_) {
 double Node2d::getY() {
 	return y;
 }
-Element2d::Element2d() :no(0), x(0), y(0), Se(0)
-{
-
-}
+Element2d::Element2d() :no(0), x(0), y(0), Se(0){}
 void Element2d::setNo(int no_) {
 	no = no_;
 }
@@ -85,15 +78,51 @@ double const& Time::operator[](int n)const {
 double& Time::operator[](int n) {
 	return t[n];
 }
-Mesh2d::Mesh2d() 
-	: Lx_(0), Ly_(0), xb_(0), xt_(0), yb_(0), yt_(0), dx_(0), dy_(0), xnode_(0), ynode_(0), xelem_(0), yelem_(0), nnode_(0), nelem_(0)
+Mesh2d::Mesh2d(InputData& Input)
+	:nparam_(Input.get_NodeParam()), Bcond_(Input.get_BC()), Lx_(0), Ly_(0), xb_(0), xt_(0), yb_(0), yt_(0), dx_(0), dy_(0), xnode_(0), ynode_(0), xelem_(0), yelem_(0), nnode_(0), nelem_(0)
 {
+	//setup();
+	xb_ = nparam_.getXb();
+	xt_ = nparam_.getXt();
+	yb_ = nparam_.getYb();
+	yt_ = nparam_.getYt();
+	dx_ = nparam_.getDx();
+	dy_ = nparam_.getDy();
+	Lx_ = nparam_.getLx();
+	Ly_ = nparam_.getLy();
+	xnode_ = nparam_.getXnode();
+	ynode_ = nparam_.getYnode();
+	nnode_ = nparam_.getNnode();
 
+	xelem_ = nparam_.getXelem();
+	yelem_ = nparam_.getYelem();
+	nelem_ = nparam_.getNelem();
+
+	nbool1_ = Input.getnbool1();
+	nbool3_ = Input.getnbool3();
+	ncond_ = Input.getcond();
+	X = Input.getx();
+	Y = Input.gety();
 }
 Mesh2d::Mesh2d(NodeP& NP, Boundarycond& BC)
 	:nparam_(NP), Bcond_(BC), Lx_(0), Ly_(0), xb_(0), xt_(0), yb_(0), yt_(0), dx_(0), dy_(0), xnode_(0), ynode_(0), xelem_(0), yelem_(0), nnode_(0), nelem_(0)
 {
-	//setup();
+	xb_ = nparam_.getXb();
+	xt_ = nparam_.getXt();
+	yb_ = nparam_.getYb();
+	yt_ = nparam_.getYt();
+	dx_ = nparam_.getDx();
+	dy_ = nparam_.getDy();
+	Lx_ = nparam_.getLx();
+	Ly_ = nparam_.getLy();
+
+	xnode_ = nparam_.getXnode();
+	ynode_ = nparam_.getYnode();
+	nnode_ = nparam_.getNnode();
+
+	xelem_ = nparam_.getXelem();
+	yelem_ = nparam_.getYelem();
+	nelem_ = nparam_.getNelem();
 
 }
 Mesh2d& Mesh2d::operator=(const Mesh2d& mesh) {
@@ -147,23 +176,33 @@ Mesh2d::Mesh2d(const Mesh2d& mesh)
 	yelem_ = mesh.yelem_;
 	nelem_ = mesh.nelem_;
 }
+void Mesh2d::geninputmesh() {
+	node_.resize(nnode_);
+	elem_.resize(nelem_);
+	for (int np = 0; np < nnode_; np++) {
+		node_[np].setNo(np);
+		node_[np].setX(X[np]);
+		node_[np].setY(Y[np]);
+	}
+	for (int ie = 0; ie < nelem_; ie++) {
+		elem_[ie].setNo(ie);
+		int i1 = nbool1_[ie][0];
+		int i2 = nbool1_[ie][1];
+		int i3 = nbool1_[ie][2];
+		int i4 = nbool1_[ie][3];
+
+		elem_[ie].setX((node_[i1].getX() + node_[i2].getX() + node_[i3].getX() + node_[i4].getX()) / 4);//要素重心のx座標
+		elem_[ie].setY((node_[i1].getY() + node_[i2].getY() + node_[i3].getY() + node_[i4].getY()) / 4);//要素重心のy座標
+		double S;
+		S = ((node_[i3].getX() - node_[i1].getX()) * (node_[i4].getY() - node_[i2].getY())
+			- (node_[i4].getX() - node_[i2].getX()) * (node_[i3].getY() - node_[i1].getY())) / 4;//要素四角形の面積を求める
+
+		elem_[ie].setSe(S);
+	}
+}
+/*
 void Mesh2d::setup() {
-	xb_ = nparam_.getXb();
-	xt_ = nparam_.getXt();
-	yb_ = nparam_.getYb();
-	yt_ = nparam_.getYt();
-	dx_ = nparam_.getDx();
-	dy_ = nparam_.getDy();
-	Lx_ = nparam_.getLx();
-	Ly_ = nparam_.getLy();
-
-	xnode_ = nparam_.getXnode();
-	ynode_ = nparam_.getYnode();
-	nnode_ = nparam_.getNnode();
-
-	xelem_ = nparam_.getXelem();
-	yelem_ = nparam_.getYelem();
-	nelem_ = nparam_.getNelem();
+	
 
 	int N = 4;//一要素の節点数
 	nbool1_.resize(nelem_);
@@ -180,6 +219,8 @@ void Mesh2d::setup() {
 	node_.resize(nnode_);
 	elem_.resize(nelem_);
 }
+*/
+/*
 void Mesh2d::generate() {
 	//節点座標の計算
 	for (int j = 0; j < ynode_; j++) {
@@ -274,6 +315,7 @@ void Mesh2d::generate() {
 	}
 
 }
+*/
 
 
 double Mesh2d::xb() {
@@ -366,6 +408,7 @@ int Mesh2d::nbool3(int ie, int np) {
 int Mesh2d::ncond(int i) {
 	return ncond_[i];
 }
+/*
 CavityMesh2d::CavityMesh2d(NodeP& NP, Boundarycond& BC)
 	:Mesh2d(NP, BC)
 {
@@ -626,3 +669,4 @@ void BackstepMesh2d::generate() {
 		}
 	}
 }
+*/

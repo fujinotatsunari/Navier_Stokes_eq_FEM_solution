@@ -60,6 +60,8 @@ public:
 	//vectorのゲッタ
 	vector<double> getUx();
 	vector<double> getUy();
+	vector<double> getx();
+	vector<double> gety();
 	vector<double> getP();
 	vector<int> getcond();
 	//クラスのゲッタ

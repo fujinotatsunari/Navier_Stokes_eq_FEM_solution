@@ -23,6 +23,12 @@ vector<double> InputData::getUx() {
 vector<double> InputData::getUy() {
 	return Uy;
 }
+vector<double> InputData::getx() {
+	return x;
+}
+vector<double> InputData::gety() {
+	return y;
+}
 vector<double> InputData::getP() {
 	return P;
 }
