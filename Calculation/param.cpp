@@ -294,6 +294,16 @@ void Boundarycond::setBCflagU(int flag) {
 void Boundarycond::setBCflagC(int flag) {
 	flagC = flag;
 }
+NDNSparam::NDNSparam() {
+	cout << "レイノルズ数 Re->";
+	cin >> Re;
+}
+double NDNSparam::get_Re() {
+	return Re;
+}
+void NDNSparam::set_Re(double re){
+	Re = re;
+}
 /*
 ADeq_param_2d::ADeq_param_2d(NodeP& Np, TimeP& Tp)
 	:nparam(Np),tparam(Tp)
