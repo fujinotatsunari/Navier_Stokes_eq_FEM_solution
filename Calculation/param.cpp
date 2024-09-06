@@ -81,7 +81,7 @@ void NodeP::setLx(double lx) {
 double NodeP::getLy() {
 	return Ly;
 }
-void NodeP::setLx(double ly) {
+void NodeP::setLy(double ly) {
 	Ly = ly;
 }
 double NodeP::getXb() {

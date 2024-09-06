@@ -7,32 +7,35 @@
 using namespace std;
 # define PI 3.14159265359
 
-Scalar2d::Scalar2d() :v(0) {}
-Scalar2d::Scalar2d(double V) :v(V) {}
+Scalar2d::Scalar2d() :V(0) {}
+Scalar2d::Scalar2d(double val) :V(val) {}
 
 double& Scalar2d::operator[](int i) {
-	return v;
+	return V;
 }
 const double& Scalar2d::operator[](int i)const {
-	return v;
+	return V;
 }
-Scalar2d& Scalar2d::operator=(const Scalar2d& V) {
+double Scalar2d::v() {
+	return V;
+}
+Scalar2d& Scalar2d::operator=(const Scalar2d& val) {
 
-	v = V.v;
+	V = val.V;
 	return *this;
 }
-Scalar2d& Scalar2d::operator=(const double V) {
-	v = V;
+Scalar2d& Scalar2d::operator=(const double val) {
+	V = val;
 	return *this;
 }
-Scalar2d& Scalar2d::operator+=(const Scalar2d& V) {
+Scalar2d& Scalar2d::operator+=(const Scalar2d& val) {
 
-	v += V.v;
+	V += val.V;
 	return *this;
 }
-Scalar2d& Scalar2d::operator-=(const Scalar2d& V) {
+Scalar2d& Scalar2d::operator-=(const Scalar2d& val) {
 
-	v -= V.v;
+	V -= val.V;
 	return *this;
 }
 Scalar2d operator+(const Scalar2d& a, const Scalar2d& b) {

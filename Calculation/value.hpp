@@ -6,11 +6,11 @@
 
 class Scalar2d {//二次元スカラー量クラス
 private:
-	double v;//スカラー量
+	double V;//スカラー量
 public:
 	Scalar2d();
 	Scalar2d(double V);
-
+	double v();
 	double& operator[](int i);//任意の整数値を添え字に取る
 	const double& operator[](int i) const;
 
@@ -22,6 +22,7 @@ public:
 Scalar2d operator+(const Scalar2d&, const Scalar2d&);
 Scalar2d operator-(const Scalar2d&, const Scalar2d&);
 Scalar2d operator*(const Scalar2d&, const Scalar2d&);
+
 Scalar2d operator*(const double, const Scalar2d& V);
 Scalar2d operator/(const Scalar2d& V, const double k);
 

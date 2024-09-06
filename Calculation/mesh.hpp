@@ -2,6 +2,7 @@
 #include "input.hpp"
 #include "mesh.hpp"
 #include "param.hpp"
+#include"value.hpp"
 #include <vector>
 
 class Node2d {//計算格子上の節点
@@ -86,7 +87,7 @@ protected:
 	
 
 	vector<vector<int>> nbool1_;//nbool[要素番号][要素内節点番号]=全体節点番号
-	vector<vector<int>> nbool3_;//nbool3[要素番号][ローカルな要素番号]=全体要素番号 ::ある要素に隣接する要素の番号
+	vector<vector<int>> nbool3_;//nbool3[要素番号][ローカルな要素番号(下,右,上,左)]=全体要素番号 ::ある要素に隣接する要素の番号
 	double xb_, xt_, yb_, yt_, dx_, dy_, Lx_, Ly_;
 	int xnode_, ynode_, xelem_, yelem_, nnode_, nelem_;
 public:
@@ -118,54 +119,22 @@ public:
 	int nelem();
 
 	int nbool1(int ie, int np);
-	int i1(int ie);//nbool1[ie][0]に対応する節点
-	int i2(int ie);//nbool1[ie][1]に対応する節点
-	int i3(int ie);//nbool1[ie][2]に対応する節点
-	int i4(int ie);//nbool1[ie][3]に対応する節点
+	int i1(int ie);//nbool1[ie][0]に対応する節点(左下)
+	int i2(int ie);//nbool1[ie][1]に対応する節点(右下)
+	int i3(int ie);//nbool1[ie][2]に対応する節点(右上)
+	int i4(int ie);//nbool1[ie][3]に対応する節点(左上)
 	int nbool3(int ie, int np);
-	int e1(int ie);//nbool3[ie][0]に対応する要素
-	int e2(int ie);//nbool3[ie][1]に対応する要素
-	int e3(int ie);//nbool3[ie][2]に対応する要素
-	int e4(int ie);//nbool3[ie][3]に対応する要素
+	int e1(int ie);//nbool3[ie][0]に対応する要素(下)
+	int e2(int ie);//nbool3[ie][1]に対応する要素(右)
+	int e3(int ie);//nbool3[ie][2]に対応する要素(上)
+	int e4(int ie);//nbool3[ie][3]に対応する要素(左)
 	int ncond(int i);
-	int scond(int i);
+	int scond(int ie);
 
+	double length(int i1, int i2);//2点の線分の長さ
+	double area(int e1, int e2);//2要素とそれを挟む辺の両端がなす面積
+	double area(int i1, int i2, int i3, int i4);//4点からなる四角形の面積
 	void geninputmesh();//inputしたmeshの可視化
-	//virtual void generate();//等間隔グリッドの作成
-
-	//void generate_cylinder_grid();//円柱周りグリッドの作成(後々作成　)
-	//void generate_cavity_grid();//cavity流れ用のグリッド作成(境界条件の情報ncondを書き換えるだけ)
-	//void generate_backstep_grid();//backstep流れ用のグリッド
+	
 };
 
-/*
-class CavityMesh2d :public Mesh2d {//キャビティ流れ用のMeshクラス
-public:
-	CavityMesh2d(NodeP& NP, Boundarycond& BC);
-	void generate()override;//cavity流れ用のグリッド
-
-};
-
-
-class BackstepMesh2d :public Mesh2d {//backstep流れ用のMeshクラス
-private:
-	double hx;//段差のステップの長さ 
-	double	hy;//段差の高さ 
-
-
-public:
-	BackstepMesh2d(NodeP& NP, Boundarycond& BC);
-	void generate()override;//backstep流れ用のグリッド
-
-};
-
-
-class CylinderMesh2d :public Mesh2d {//円柱流れ用のMeshクラス
-private:
-	double r;//円柱の半径
-	double Rx, Ry;//円柱周りメッシュの領域 Lx/2,Ly/2
-	double rx, ry;//円柱中心の座標
-	double dxm, dym;//円柱周りの格子刻み幅
-	double mx, my;//円柱周りの要素数
-};
-*/
