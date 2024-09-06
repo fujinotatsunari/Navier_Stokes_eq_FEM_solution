@@ -124,7 +124,7 @@ public:
 	int e4(int ie);//nbool3[ie][3]に対応する要素
 	int ncond(int i);
 
-	void geninputmesh();//初期化
+	void geninputmesh();//inputしたmeshの可視化
 	//virtual void generate();//等間隔グリッドの作成
 
 	//void generate_cylinder_grid();//円柱周りグリッドの作成(後々作成　)

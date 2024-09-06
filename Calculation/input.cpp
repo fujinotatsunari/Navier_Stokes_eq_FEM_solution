@@ -296,6 +296,8 @@ void InputData::input_csv() {
 			}
 			file.close();
 			count++;
+			v.clear();
+
 		}
 		else {
 			cout << filename << "を開けませんでした" << endl;

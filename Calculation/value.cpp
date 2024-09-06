@@ -1,8 +1,9 @@
-#include"value.hpp"
-#include"mesh.hpp"
-#include<cmath>
-#include<vector>
-#include<iostream>
+#include "value.hpp"
+#include "mesh.hpp"
+#include "input.hpp"
+#include <cmath>
+#include <vector>
+#include <iostream>
 using namespace std;
 # define PI 3.14159265359
 
@@ -68,43 +69,51 @@ const Scalar2d& ScalarField2d::operator[](int i)const {
 Scalar2d& ScalarField2d::operator[](int i) {
 	return scalar[i];
 }
-Vector2d::Vector2d() :x(0),y(0){}
-Vector2d::Vector2d(double X,double Y):x(X),y(Y){}
+Vector2d::Vector2d() :x_(0),y_(0){}
+Vector2d::Vector2d(double X,double Y):x_(X),y_(Y){}
 Vector2d::Vector2d(const Vector2d& V) {
-	x = V.x;
-	y = V.y;
+	x_ = V.x_;
+	y_ = V.y_;
 }
 double& Vector2d::operator[](int i) {
 	if (i == 0) {//x成分を返す
-		return x;
+		return x_;
 	}
 	else if (i == 1) {
-		return y;//y成分を返す
+		return y_;//y成分を返す
+	}
+	else {
+		cout << "ベクトルの要素範囲外です" << endl;
+		exit(-1);
 	}
 }
 const double& Vector2d::operator[](int i) const {
 	if (i == 0) {//x成分を返す
-		return x;
+		return x_;
 	}
 	else if (i == 1) {
-		return y;//y成分を返す
+		return y_;//y成分を返す
+	}
+	else {
+		cout << "ベクトルの要素範囲外です" << endl;
+		exit(-1);
 	}
 }
 Vector2d& Vector2d::operator=(const Vector2d& V) {
-	x = V.x;
-	y = V.y;
+	x_ = V.x_;
+	y_ = V.y_;
 
 	return *this;
 }
 Vector2d& Vector2d::operator+=(const Vector2d& V) {
-	x += V.x;
-	y += V.y;
+	x_ += V.x_;
+	y_ += V.y_;
 
 	return *this;
 }
 Vector2d& Vector2d::operator-=(const Vector2d& V) {
-	x -= V.x;
-	y -= V.y;
+	x_ -= V.x_;
+	y_ -= V.y_;
 
 	return *this;
 }
@@ -165,6 +174,12 @@ Pressure::Pressure(Mesh2d& Mesh, Boundarycond& BC)
 	scalar.resize(nelem);
 	
 }
+void Pressure::input(InputData& input) {
+	for (int ie = 0; ie < nelem; ie++) {
+		scalar[ie] = input.getP()[ie];
+	}
+}
+/*
 void Pressure::init() {
 	
 	for (int j = 0; j < mesh.yelem(); j++) {
@@ -179,9 +194,11 @@ void Pressure::cavity_init() {
 	init();
 
 }
+
 void Pressure::backstep_init() {
 	init();
 }
+*/
 PHI::PHI(Mesh2d& Mesh, Boundarycond& BC)
 	:ScalarField2d(Mesh, BC),nnode(Mesh.nnode())
 {
@@ -201,6 +218,14 @@ Velocity2d::Velocity2d(Mesh2d& Mesh, Boundarycond& BC)
 {
 	vector.resize(nnode);
 }
+
+void Velocity2d::input(InputData& input) {
+	for (int np = 0; np < nnode; np++) {
+		Vector2d V(input.getUx()[np], input.getUy()[np]);
+		vector[np] = V;
+	}
+}
+/*
 void Velocity2d::init() {
 	Vector2d V(0.0, 0.0);
 	for (int j = 0; j < mesh.ynode(); j++) {
@@ -236,7 +261,7 @@ void Velocity2d::backstep_init() {
 	}
 	
 
-}
+}*/
 
 /*
 PHI::PHI(Mesh2d& mesh, Boundarycond& BC)

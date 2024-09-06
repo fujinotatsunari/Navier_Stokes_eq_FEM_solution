@@ -1,7 +1,8 @@
 #pragma once
-#include"value.hpp"
-#include"Mesh.hpp"
-#include<vector>
+#include "value.hpp"
+#include "Mesh.hpp"
+#include "input.hpp"
+#include <vector>
 
 class Scalar2d {//二次元スカラー量クラス
 private:
@@ -43,13 +44,14 @@ public:
 
 class Vector2d {
 private:
-	double x, y;
+	double x_, y_;
 public:
 	Vector2d();
 	Vector2d(double X, double Y);
 	Vector2d(const Vector2d& V);
 	double& operator[](int i);
 	double const& operator[](int i) const;
+
 	Vector2d& operator=(const Vector2d& V);
 	Vector2d& operator+=(const Vector2d& V);
 	Vector2d& operator-=(const Vector2d& V);
@@ -79,9 +81,10 @@ private:
 	int nelem;//要素数
 public:
 	Pressure(Mesh2d& mesh, Boundarycond& BC);
-	void init();//初期化
-	void cavity_init();//キャビティ流れの初期化(圧力編)
-	void backstep_init();//バックステップ流れの初期化
+	void input(InputData& input);
+	//void init();//初期化
+	//void cavity_init();//キャビティ流れの初期化(圧力編)
+	//void backstep_init();//バックステップ流れの初期化
 };
 class PHI :public ScalarField2d {//移流拡散方程式の物理量phi
 private:
@@ -100,9 +103,11 @@ private:
 	int nnode;
 public:
 	Velocity2d(Mesh2d& mesh, Boundarycond& BC);
-	void init();//初期化
-	void cavity_init();//キャビティ流れの初期化(流速編)
-	void backstep_init();//バックステップ流れの初期化
+
+	void input(InputData& input);
+	//void init();//初期化
+	//void cavity_init();//キャビティ流れの初期化(流速編)
+	//void backstep_init();//バックステップ流れの初期化
 };
 
 
