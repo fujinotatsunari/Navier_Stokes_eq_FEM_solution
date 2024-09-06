@@ -101,6 +101,7 @@ Mesh2d::Mesh2d(InputData& Input)
 	nbool1_ = Input.getnbool1();
 	nbool3_ = Input.getnbool3();
 	ncond_ = Input.getcond();
+	scond_.resize(nelem_);
 	X = Input.getx();
 	Y = Input.gety();
 }
@@ -125,12 +126,14 @@ Mesh2d::Mesh2d(NodeP& NP, Boundarycond& BC)
 	nelem_ = nparam_.getNelem();
 
 }
+
 Mesh2d& Mesh2d::operator=(const Mesh2d& mesh) {
 	nparam_ = mesh.nparam_;
 	Bcond_ = mesh.Bcond_;
 	node_ = mesh.node_;
 	elem_ = mesh.elem_;
 	ncond_ = mesh.ncond_;
+	scond_ = mesh.scond_;
 	nbool1_ = mesh.nbool1_;
 	nbool3_ = mesh.nbool3_;
 	xb_ = mesh.xb_;
@@ -158,6 +161,7 @@ Mesh2d::Mesh2d(const Mesh2d& mesh)
 	node_ = mesh.node_;
 	elem_ = mesh.elem_;
 	ncond_ = mesh.ncond_;
+	scond_ = mesh.scond_;
 	nbool1_ = mesh.nbool1_;
 	nbool3_ = mesh.nbool3_;
 	xb_ = mesh.xb_;
@@ -198,6 +202,25 @@ void Mesh2d::geninputmesh() {
 			- (node_[i4].getX() - node_[i2].getX()) * (node_[i3].getY() - node_[i1].getY())) / 4;//要素四角形の面積を求める
 
 		elem_[ie].setSe(S);
+	}
+	for (int ie = 0; ie < nelem_; ie++) {
+		scond_[ie] = 0;
+	}
+	for (int ie = 0; ie < nelem_; ie++) {
+		int i1 = nbool1_[ie][0];
+		int i2 = nbool1_[ie][1];
+		int i3 = nbool1_[ie][2];
+		int i4 = nbool1_[ie][3];
+
+		if (ncond(i1) == 1 || ncond(i2) == 1 || ncond(i3) == 1 || ncond(i4) == 1) {
+			//要素内の点に剛体内部のフラグが立つ
+			scond_[ie] = 1;
+		}
+		if (ncond(i1) != 0 && ncond(i2) != 0 && ncond(i3) != 0 && ncond(i4) != 0) {
+			//要素内のすべての点が壁面のフラグ
+			scond_[ie] = 1;
+		}
+		
 	}
 }
 /*
@@ -407,6 +430,9 @@ int Mesh2d::nbool3(int ie, int np) {
 }
 int Mesh2d::ncond(int i) {
 	return ncond_[i];
+}
+int Mesh2d::scond(int i) {
+	return scond_[i];
 }
 /*
 CavityMesh2d::CavityMesh2d(NodeP& NP, Boundarycond& BC)

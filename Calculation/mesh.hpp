@@ -72,14 +72,19 @@ protected:
 	vector<Node2d> node_;
 	vector<Element2d> elem_;
 	vector<int> ncond_;//節点境界フラグ
+	vector<int> scond_;//要素フラグ
 	vector<double> X;
 	vector<double> Y;
 	//境界条件フラグの設定
-	//ncond:  0:内部,	1:剛体壁面(流入流出なし),
+	//ncond:  0:内部,	1:剛体内部(流入流出なし),
 			//2:流入壁面(dirichlet)　3:流出壁面(neumann)
 			//4:移動壁面条件(壁面接線方向に流速固定値1),5:滑りなし条件(壁面において(u,v)=(0,0))
 			//6:滑りあり条件(dvx/dy=0,vy=0)
+
+	//要素フラグの設定
+	//scond: 0:内部 1:障害物内部
 	
+
 	vector<vector<int>> nbool1_;//nbool[要素番号][要素内節点番号]=全体節点番号
 	vector<vector<int>> nbool3_;//nbool3[要素番号][ローカルな要素番号]=全体要素番号 ::ある要素に隣接する要素の番号
 	double xb_, xt_, yb_, yt_, dx_, dy_, Lx_, Ly_;
@@ -102,8 +107,8 @@ public:
 	double Ly();
 	double x(int i);//節点番号に対応するx座標
 	double y(int i);//節点番号に対応するy座標
-	double eX(int ie);//要素番号に対応するx座標
-	double eY(int ie);//要素番号に対応するy座標
+	double eX(int ie);//要素番号に対応するx座標(要素重心)
+	double eY(int ie);//要素番号に対応するy座標(要素重心)
 	double Se(int ie);//要素番号に対応する要素面積
 	int xnode();
 	int ynode();
@@ -123,6 +128,7 @@ public:
 	int e3(int ie);//nbool3[ie][2]に対応する要素
 	int e4(int ie);//nbool3[ie][3]に対応する要素
 	int ncond(int i);
+	int scond(int i);
 
 	void geninputmesh();//inputしたmeshの可視化
 	//virtual void generate();//等間隔グリッドの作成
