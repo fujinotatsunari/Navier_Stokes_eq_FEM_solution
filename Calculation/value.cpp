@@ -38,6 +38,11 @@ Scalar2d& Scalar2d::operator-=(const Scalar2d& val) {
 	V -= val.V;
 	return *this;
 }
+Scalar2d Scalar2d::operator-() const {
+	Scalar2d S;
+	S.V = -V;
+	return S;
+}
 Scalar2d operator+(const Scalar2d& a, const Scalar2d& b) {
 	Scalar2d val;
 	val[0] = a[0] + b[0];
@@ -150,6 +155,18 @@ Vector2d operator*(const Scalar2d& k, const Vector2d& V) {
 	vec[1] = k[0] * V[1];
 	return vec;
 }
+Vector2d operator*(const Vector2d& V, const double k) {
+	Vector2d vec;
+	vec[0] = k * V[0];
+	vec[1] = k * V[1];
+	return vec;
+}
+Vector2d operator*(const Vector2d& V, const Scalar2d& k) {
+	Vector2d vec;
+	vec[0] = k[0] * V[0];
+	vec[1] = k[0] * V[1];
+	return vec;
+}
 Scalar2d operator%(const Vector2d& v1, const Vector2d& v2) {
 	Scalar2d val;
 	val[0] = v1[0] * v2[1] - v2[0] * v1[1];
@@ -202,20 +219,7 @@ void Pressure::backstep_init() {
 	init();
 }
 */
-PHI::PHI(Mesh2d& Mesh, Boundarycond& BC)
-	:ScalarField2d(Mesh, BC),nnode(Mesh.nnode())
-{
-	scalar.resize(nnode);
-}
-void PHI::init() {
-	for (int j = 0; j < mesh.ynode(); j++) {
-		for (int i = 0; i < mesh.xnode(); i++) {
-			int np = i + mesh.xnode() * j;
-			scalar[np][0] = 0.0;
 
-		}
-	}
-}
 Velocity2d::Velocity2d(Mesh2d& Mesh, Boundarycond& BC) 
 	:VectorField2d(Mesh, BC), nnode(Mesh.nnode())
 {
@@ -265,7 +269,22 @@ void Velocity2d::backstep_init() {
 	
 
 }*/
+/*
+PHI::PHI(Mesh2d& Mesh, Boundarycond& BC)
+	:ScalarField2d(Mesh, BC),nnode(Mesh.nnode())
+{
+	scalar.resize(nnode);
+}
+void PHI::init() {
+	for (int j = 0; j < mesh.ynode(); j++) {
+		for (int i = 0; i < mesh.xnode(); i++) {
+			int np = i + mesh.xnode() * j;
+			scalar[np][0] = 0.0;
 
+		}
+	}
+}
+*/
 /*
 PHI::PHI(Mesh2d& mesh, Boundarycond& BC)
 	:ScalarField2d(mesh, BC)

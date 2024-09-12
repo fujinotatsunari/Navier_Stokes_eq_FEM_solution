@@ -18,6 +18,6 @@ public:
 	SORparam(Mesh2d& Mesh);
 	int get_nmax();
 	double get_eps();
-	double getlambda(int ie);
+	double get_lambda(int ie);
 	
 };

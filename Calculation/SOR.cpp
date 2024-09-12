@@ -119,3 +119,12 @@ SORparam::SORparam(Mesh2d& Mesh)
 		
 	}
 }
+int SORparam::get_nmax() {
+	return nmax;
+}
+double SORparam::get_eps() {
+	return eps;
+}
+double SORparam::get_lambda(int ie) {
+	return lambda[ie];
+}

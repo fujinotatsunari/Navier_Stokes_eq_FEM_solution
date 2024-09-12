@@ -74,8 +74,7 @@ protected:
 	vector<Element2d> elem_;
 	vector<int> ncond_;//節点境界フラグ
 	vector<int> scond_;//要素フラグ
-	vector<double> X;
-	vector<double> Y;
+	
 	//境界条件フラグの設定
 	//ncond:  0:内部,	1:剛体内部(流入流出なし),
 			//2:流入壁面(dirichlet)　3:流出壁面(neumann)
@@ -85,7 +84,8 @@ protected:
 	//要素フラグの設定
 	//scond: 0:内部 1:障害物内部
 	
-
+	vector<double> X;
+	vector<double> Y;
 	vector<vector<int>> nbool1_;//nbool[要素番号][要素内節点番号]=全体節点番号
 	vector<vector<int>> nbool3_;//nbool3[要素番号][ローカルな要素番号(下,右,上,左)]=全体要素番号 ::ある要素に隣接する要素の番号
 	double xb_, xt_, yb_, yt_, dx_, dy_, Lx_, Ly_;

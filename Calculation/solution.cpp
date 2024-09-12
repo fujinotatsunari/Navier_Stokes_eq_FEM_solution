@@ -1,6 +1,7 @@
 #include"solution.hpp"
 #include"output.hpp"
 #include"FEM.hpp"
+#include"SOR.hpp"
 #include"value.hpp"
 #include"Mesh.hpp"
 #include"param.hpp"
@@ -9,252 +10,415 @@
 #include<iostream>
 
 using namespace std;
-
-Explicit_FEM::Explicit_FEM(Mesh2d& mesh_, Time& t_, PHI& phi_, Boundarycond& BC_, ADeq_param_2d& adp_)
-	:mesh(mesh_), t(t_), phi(phi_), BC(BC_), ADP(adp_)
+Divergence::Divergence(Mesh2d& Mesh,Boundarycond& BC)//発散量
+	:ScalarField2d(Mesh, BC),size(Mesh.nelem())
 {
+	//発散量コンストラクタ
+	scalar.resize(size);
+}
+void Divergence::cal_divergence(Velocity2d& v) {//発散量の計算
+	
+	GradientVector C(mesh);
 
+	for (int ie = 0; ie < scalar.size(); ie++) {
+		int i1 = mesh.i1(ie);
+		int i2 = mesh.i2(ie);
+		int i3 = mesh.i3(ie);
+		int i4 = mesh.i4(ie);
+		double S = mesh.Se(ie);
+		if (mesh.scond(ie) != 1) {//非障害物領域
+			scalar[ie] = (C[ie][0][0] * v[i1][0] + C[ie][0][1] * v[i1][1]
+						+ C[ie][1][0] * v[i2][0] + C[ie][1][1] * v[i2][1]
+						+ C[ie][2][0] * v[i3][0] + C[ie][2][1] * v[i3][1]
+						+ C[ie][3][0] * v[i4][0] + C[ie][3][1] * v[i4][1]) / S;
+		}
+		else {//障害物内部
+			scalar[ie] = 0.0;
+		}
+
+	}
+}
+void Divergence::cal_divergence(vector<Vector2d>& v) {//発散量の計算
+	
+	GradientVector C(mesh);
+
+	for (int ie = 0; ie < scalar.size(); ie++) {
+		int i1 = mesh.i1(ie);
+		int i2 = mesh.i2(ie);
+		int i3 = mesh.i3(ie);
+		int i4 = mesh.i4(ie);
+		double S = mesh.Se(ie);
+		if (mesh.scond(ie) != 1) {//非障害物領域
+			scalar[ie] = (C[ie][0][0] * v[i1][0] + C[ie][0][1] * v[i1][1]
+						+ C[ie][1][0] * v[i2][0] + C[ie][1][1] * v[i2][1]
+						+ C[ie][2][0] * v[i3][0] + C[ie][2][1] * v[i3][1]
+						+ C[ie][3][0] * v[i4][0] + C[ie][3][1] * v[i4][1]) / S;
+		}
+		else {//障害物内部
+			scalar[ie] = 0.0;
+		}
+		
+
+	}
+}
+double Divergence::max_div() {//発散量の絶対値の最大値を調べる
+	double max = fabs(scalar[0].v());
+	for (int i = 0; i < scalar.size(); i++) {
+		if (max < fabs(scalar[i].v())) {
+			max = fabs(scalar[i].v());
+		}
+	}
+	return max;
+}
+VMPotential::VMPotential(Mesh2d& Mesh, Boundarycond& bc)//速度修正ポテンシャル
+	:ScalarField2d(Mesh, bc), size(Mesh.nelem())
+{
+	//速度修正ポテンシャルコンストラクタ
+	scalar.resize(size);
+}
+void VMPotential::cal_VMP(Divergence& D, SORparam& param) {//速度修正ポテンシャルの計算
+	for (int ie = 0; ie < scalar.size(); ie++) {
+		if (mesh.scond(ie) != 1) {//障害物領域でない
+			scalar[ie] = -D[ie] / param.get_lambda(ie);
+		}
+		else {//障害物領域
+			scalar[ie] = 0.0;
+		}
+		
+	}
 }
 
-void Explicit_FEM::do_expcalculation() {
+Predictor::Predictor()
+{
+	//予測子コンストラクタ
+}
+void Predictor::euler_explicit(Velocity2d& v, Pressure& p, Time& T, Mesh2d& Mesh, NDNSparam& Param) {
+	//オイラー前進法による予測子計算
+	//Fm*(V~-V)/dt= Cv*P - Am*V - Dm*V/Re - dt/2*Bm*V を予測子V~についてとく(Vは既知の流速)
+	
+	Lumped_Massmatrix Fm(Mesh);//集中化質量行列
+	Diffmatrix Dm(Mesh);//拡散行列
+	Advecmatrix Am(Mesh, v);//移流行列
+	GradientVector Cv(Mesh);//勾配ベクトル
+	BTDmatrix Bm(Mesh, v);//BTD行列
 
-	Lumped_Massmatrix Fm(mesh);//集中化質量行列
-	xAdvecmatrix Amx(mesh);//移流行列x方向
-	yAdvecmatrix Amy(mesh);//移流行列y方向
-	Diffmatrix Dm(mesh);//拡散行列
-	OutputData out(mesh, t, phi, ADP, BC);
-	out.set_scheme(0);//陽解法をset
-	out.set_Filestage(0);
-	out.directory_setup();
-	//cout << out.get_dir() << endl;
-	//cout << out.get_Filestage() << endl;
-	//cout << out.get_dir() << endl;
-	/*
-	cout << "viewFm" << endl;
-	Fm.view();
-	cout << "viewAmx" << endl;
-	Amx.view();
-	cout << "viewAmy" << endl;
-	Amy.view();
-	cout << "viewDm" << endl;
-	Dm.view();
-	*/
-	vector<double> phib;//1step前の物理量
-	phib.resize(mesh.nnode());
-	vector<double> dd;//拡散項足し込み変数
-	dd.resize(mesh.nnode());
-	vector<double> uu;//移流項足し込み変数
-	uu.resize(mesh.nnode());
-	vector<double> nn;//境界項足し込み変数
-	nn.resize(mesh.nnode());
+	double rRe = 1 / Param.get_Re();//レイノルズ数逆数(拡散項の係数)
+	double Cbtd = T.dt() / 2;//BTD項係数
+
+	Vector2d aa;//移流項足し込み変数
+	Vector2d dd;//拡散項足し込み変数
+	Vector2d bb;//btd項足し込み変数
+
 	vector<double> ff;//集中化質量行列の節点への寄与
-	ff.resize(mesh.nnode());
+	ff.resize(Mesh.nnode());
 
-	vector<int> nx;//境界上の単位法線ベクトルx方向
-	nx.resize(mesh.nnode());
-	vector<int> ny;//境界上の単位法線ベクトルx方向
-	ny.resize(mesh.nnode());
-	double dphidx = 0.0;
-	double dphidy = 0.0;
-	for (int j = 0; j < mesh.ynode(); j++) {
-		for (int i = 0; i < mesh.xnode(); i++) {
-			int np = i + mesh.xnode() * j;
-			nx[np] = 0;
-			ny[np] = 0;
-			if (i == 0) {
-				nx[np] = -1;//境界法線単位ベクトル
-			}
-			if (i == mesh.xnode() - 1) {
-				nx[np] = 1;
-			}
-			if (j == 0) {
-				ny[np] = -1;
-			}
-			if (j == mesh.ynode() - 1) {
-				ny[np] = 1;
-			}
+	vector<Vector2d> UU;
+	UU.resize(Mesh.nnode());//速度場の足し込み値(時間進行により増加する値)
+	vector<Vector2d> UB;
+	UB.resize(Mesh.nnode());//速度場の1step前の値
+
+	vector<int> nx;//境界上の法線フラグx方向
+	nx.resize(Mesh.nnode());
+	vector<int> ny;//境界上の法線フラグy方向
+	ny.resize(Mesh.nnode());
+	//領域外側を指す方向の法線
+	//0:内部 正:壁面が面する方向が正(x,y) 負:壁面が面する方向が負(x,y)
+	//障害物を指す方向の法線
+	//0:内部 正:壁面が面する方向が負(x,y) 負:壁面が面する方向が正(x,y)
+	for (int ie = 0; ie < Mesh.nelem(); ie++) {
+
+		int i1 = Mesh.i1(ie);
+		int i2 = Mesh.i2(ie);
+		int i3 = Mesh.i3(ie);
+		int i4 = Mesh.i4(ie);
+
+		if (Mesh.scond(ie) != 1) {//障害物要素を除く領域
+			nx[i1] += -1;
+			ny[i1] += -1;
+
+			nx[i2] += 1;
+			ny[i2] += -1;
+
+			nx[i3] += 1;
+			ny[i3] += 1;
+
+			nx[i4] += -1;
+			ny[i4] += 1;
+
+		}
+		else {//障害物要素内
+			nx[i1] += 0;
+			ny[i1] += 0;
+
+			nx[i2] += 0;
+			ny[i2] += 0;
+
+			nx[i3] += 0;
+			ny[i3] += 0;
+
+			nx[i4] += 0;
+			ny[i4] += 0;
 		}
 	}
 
-	//時間進行
-	for (int n = 0; n <= t.nend(); n++) {
 
 
-		cout << "time=" << t.ntime(n) << endl;
-		for (int j = 0; j < mesh.ynode(); j++) {
-			for (int i = 0; i < mesh.xnode(); i++) {
-				int np = i + mesh.xnode() * j;
+	for (int i = 0; i < Mesh.nnode(); i++) {
+		UB[i] = v[i];//前ステップの値の保存
+	}
+	//速度場の計算
+	for (int j = 0; j < node; j++) {
+		for (int ie = 0; ie < Mesh.nelem(); ie++) {
+			int np = Mesh.nbool1(ie, j);
+			int i1 = Mesh.i1(ie);
+			int i2 = Mesh.i2(ie);
+			int i3 = Mesh.i3(ie);
+			int i4 = Mesh.i4(ie);
 
-				phib[np] = phi[np];
-				dd[np] = 0.0;
-				uu[np] = 0.0;
-				ff[np] = 0.0;
-				nn[np] = 0.0;
+			ff[np] = ff[np] + Fm[ie][j][j];
+
+			if (Mesh.scond(ie) != 1) {//ie要素が障害物内部でない
+				aa = Am[ie][j][0] * v[i1] + Am[ie][j][1] * v[i2] + Am[ie][j][2] * v[i3] + Am[ie][j][3] * v[i4];
+				//aa=Am*V^n
+				dd = Dm[ie][j][0] * v[i1] + Dm[ie][j][1] * v[i2] + Dm[ie][j][2] * v[i3] + Dm[ie][j][3] * v[i4];
+				//dd=Dm*V^n
+				bb = Bm[ie][j][0] * v[i1] + Bm[ie][j][1] * v[i2] + Bm[ie][j][2] * v[i3] + Bm[ie][j][3] * v[i4];
+				//bb=Bm*V^n
+				
+				//足し込み
+				// UU = Cv*P - Am*V - Dm*V /Re - dt/2 *Bm*V 
+				UU[np] += Cv[ie][j] * p[ie] - aa - dd * rRe - Cbtd * bb;
+			}
+			else {
+				Vector2d c(0.0, 0.0);
+				UU[np] += c;
 			}
 		}
-		for (int j = 0; j < node; j++) {//局所節点ループ
-			for (int ie = 0; ie < mesh.nelem(); ie++) {//要素ループ
-				int np = mesh.nbool1(ie, j);
-				int i1 = mesh.i1(ie);
-				int i2 = mesh.i2(ie);
-				int i3 = mesh.i3(ie);
-				int i4 = mesh.i4(ie);
+	}
+	//予測子の計算
+	for (int i = 0; i < Mesh.nnode(); i++) {
+		Vector2d c(0.0, 0.0);
+		if (Mesh.ncond(i) == 0) {//内部
+			//普通に計算
+			//予測子=(前ステップ値)+dt*(時間進行による変化)/(集中化質量行列の対角成分)
+			//V~= V + dt*UU/ff
 
-				dd[np] = dd[np] - ADP.get_alpha() * (Dm[ie][j][0] * phi[i1] + Dm[ie][j][1] * phi[i2] + Dm[ie][j][2] * phi[i3] + Dm[ie][j][3] * phi[i4]);//拡散項
-				uu[np] = uu[np] - ADP.get_cx() * (Amx[ie][j][0] * phi[i1] + Amx[ie][j][1] * phi[i2] + Amx[ie][j][2] * phi[i3] + Amx[ie][j][3] * phi[i4])//移流項
-					- ADP.get_cy() * (Amy[ie][j][0] * phi[i1] + Amy[ie][j][1] * phi[i2] + Amy[ie][j][2] * phi[i3] + Amy[ie][j][3] * phi[i4]);
-				ff[np] = ff[np] + Fm[ie][j][j];
-
-				if (mesh.ncond(np) == 2) {
-					nn[np] = nn[np] + ADP.get_alpha() * (nx[np] * dphidx + ny[np] * dphidy);//今回は流出のみをあつかうので境界項＝0
-				}
-
-
+			v[i] = UB[i] + T.dt() * UU[i] / ff[i];
+		}
+		else if (Mesh.ncond(i) == 1) {//剛体内部
+			//0固定 前ステップの値を引き継ぐ
+			v[i] = c;
+		}
+		else if (Mesh.ncond(i) == 2) {//流入壁面
+			//dirichlet 前ステップの値を引き継ぐ
+			v[i] = UB[i];
+		}
+		else if (Mesh.ncond(i) == 3) {//流出壁面
+			//流出方向 neumann 条件　接線方向は既定なし
+			v[i] = UB[i] + T.dt() * UU[i] / ff[i];
+		}
+		else if (Mesh.ncond(i) == 4) {//移動壁面
+			//壁面接線(非ゼロ)・法線方向(0) dirichlet 前ステップの値を引き継ぐ
+			v[i] = UB[i];
+		}
+		else if (Mesh.ncond(i) == 5) {//滑りなし壁面
+			//壁面接線(0)・法線方向(0) dirichlet 
+			v[i] = c;
+		}
+		else if (Mesh.ncond(i) == 6) {//滑りあり壁面
+			//壁面法線方向流速(0) dirichlet
+			//壁面接線方向流速勾配(法線方向)=0 neumann
+			if (nx[i] != 0 && ny[i] != 0) {//壁面の角
+				v[i] = c;
+			}
+			else if (nx[i] != 0 && ny[i] == 0) {
+				v[i][0] = 0.0;
+				v[i][1] = UB[i][1] + T.dt() * UU[i][1] / ff[i];
+			}
+			else if (nx[i] == 0 && ny[i] != 0) {
+				v[i][0] = UB[i][0] + T.dt() * UU[i][0] / ff[i];
+				v[i][1] = 0.0;
 			}
 		}
-
-
-		for (int j = 0; j < mesh.ynode(); j++) {
-			for (int i = 0; i < mesh.xnode(); i++) {
-				int np = i + mesh.xnode() * j;
-				if (mesh.ncond(np) == 0) {//内部
-					phi[np] = phib[np] + t.dt() * (dd[np] + uu[np]) / ff[np];
-
-
-				}
-				else if (mesh.ncond(np) == 1) {//dirichlet境界条件
-					phi[np] = phib[np];
-				}
-				else if (mesh.ncond(np) == 2) {//neumann境界条件
-					phi[np] = phib[np] + t.dt() * (dd[np] + uu[np] + nn[np]) / ff[np];
-
-				}
-				else {
-
-				}
-				//cout << "phi[" << np << "]=" << phi[np] << endl;
-			}
-		}
-		if (n == 0) {
-			out.output_condition();
-		}
-		if (n % t.nsample() == 0) {
-			out.data_update(phi);
-			out.output_result_csv(n);
-		}
+		UU[i] = c;
 	}
 }
 
-
-Implicit_FEM::Implicit_FEM(Mesh2d& mesh_, Time& t_, PHI& phi_, Boundarycond& BC_, ADeq_param_2d& adp_)
-	:mesh(mesh_), t(t_), phi(phi_), BC(BC_), ADP(adp_)
+SOR::SOR(SORparam& Param)//速度圧力同時緩和法による修正クラス
+	:sparam(Param), nor (0)
 {
 
 }
-
-void Implicit_FEM::do_impcaluculation() {
-	Lumped_Massmatrix Em(mesh);//質量行列
-	xAdvecmatrix Amx(mesh);//移流行列x方向
-	yAdvecmatrix Amy(mesh);//移流行列y方向
-	Diffmatrix Dm(mesh);//拡散行列
-	int Nnode = mesh.nnode();
-	OutputData out(mesh, t, phi, ADP, BC);
-	out.set_scheme(1);//陰解法をset
-	out.set_Filestage(0);
-	out.directory_setup();
-
-
-	vector<vector<double>> A;
-	A.resize(Nnode);
-	for (int i = 0; i < A.size(); i++) {
-		A[i].resize(Nnode);
+void SOR::do_calculation(Velocity2d& v, Pressure& p, Time& T, Mesh2d& Mesh, SORparam& param, Boundarycond& BC) {
+	Lumped_Massmatrix Fm(Mesh);//集中化質量行列
+	vector<double> ff;//集中化質量行列の対角成分のみの抽出
+	ff.resize(Mesh.nnode());
+	for (int j = 0; j < node; j++) {
+		for (int ie = 0; ie < Mesh.nelem(); ie++) {
+			int np = Mesh.nbool1(ie, j);
+			ff[np] = ff[np] + Fm[ie][j][j];
+		}
 	}
-	vector<double> b;
-	b.resize(mesh.nnode());
-	vector<double> x;
-	x.resize(mesh.nnode());
+	GradientVector Cv(Mesh);
+	vector<Vector2d> Utilde;//予測子ステップの値(これを修正していく)
+	vector<int> nx;//境界上の法線フラグx方向
+	nx.resize(Mesh.nnode());
+	vector<int> ny;//境界上の法線フラグy方向
+	ny.resize(Mesh.nnode());
+	//領域外側を指す方向の法線
+	//0:内部 正:壁面が面する方向が正(x,y) 負:壁面が面する方向が負(x,y)
+	//障害物を指す方向の法線
+	//0:内部 正:壁面が面する方向が負(x,y) 負:壁面が面する方向が正(x,y)
+	for (int ie = 0; ie < Mesh.nelem(); ie++) {
 
-	vector<double> nn;//境界項足し込み変数
-	nn.resize(mesh.nnode());
-	double dphidx = 0.0;
-	double dphidy = 0.0;
-	vector<int> nx;//境界上の単位法線ベクトルx方向
-	nx.resize(mesh.nnode());
-	vector<int> ny;//境界上の単位法線ベクトルx方向
-	ny.resize(mesh.nnode());
+		int i1 = Mesh.i1(ie);
+		int i2 = Mesh.i2(ie);
+		int i3 = Mesh.i3(ie);
+		int i4 = Mesh.i4(ie);
 
-	for (int j = 0; j < mesh.ynode(); j++) {
-		for (int i = 0; i < mesh.xnode(); i++) {
-			int np = i + mesh.xnode() * j;
-			nx[np] = 0;
-			ny[np] = 0;
-			if (i == 0) {
-				nx[np] = -1;//境界法線単位ベクトル
-			}
-			if (i == mesh.xnode() - 1) {
-				nx[np] = 1;
-			}
-			if (j == 0) {
-				ny[np] = -1;
-			}
-			if (j == mesh.ynode() - 1) {
-				ny[np] = 1;
-			}
+		if (Mesh.scond(ie) != 1) {//障害物要素を除く領域
+			nx[i1] += -1;
+			ny[i1] += -1;
+
+			nx[i2] += 1;
+			ny[i2] += -1;
+
+			nx[i3] += 1;
+			ny[i3] += 1;
+
+			nx[i4] += -1;
+			ny[i4] += 1;
+
+		}
+		else {//障害物要素内
+			nx[i1] += 0;
+			ny[i1] += 0;
+
+			nx[i2] += 0;
+			ny[i2] += 0;
+
+			nx[i3] += 0;
+			ny[i3] += 0;
+
+			nx[i4] += 0;
+			ny[i4] += 0;
 		}
 	}
 
-	cout << "time=" << t.ntime(0) << endl;
-	out.output_condition();
-	out.output_result_csv(0);
-	//時間進行
-	for (int n = 1; n <= t.nend(); n++) {
-		cout << "time=" << t.ntime(n) << endl;
-		for (int i = 0; i < A.size(); i++) {
-			for (int j = 0; j < A[i].size(); j++) {
-				A[i][j] = 0.0;
-			}
-		}
-		for (int i = 0; i < mesh.nnode(); i++) {
-			b[i] = 0.0;
-			x[i] = 0.0;
-			nn[i] = 0.0;
 
+
+	//修正ステップ
+	//step1
+	Divergence div(Mesh, BC);
+	VMPotential phi(Mesh, BC);
+	div.cal_divergence(v);
+	
+	Utilde.resize(Mesh.nnode());//予測子ステップの値
+	for (int i = 0; i < Mesh.nnode(); i++) {
+		Utilde[i] = v[i];//予測子ステップの値の代入
+	}
+	vector<Vector2d> UB;//予測子ステップの値(修正終了まで保存)
+	UB.resize(Mesh.nnode());
+	for (int i = 0; i < Mesh.nnode(); i++) {
+		UB[i] = v[i];//予測子ステップの値の保存
+	}
+	vector<Vector2d> UU;//流速の修正量
+	UU.resize(Mesh.nnode());
+
+
+	nor = 0;//反復回数初期化
+	double div_max = 0.0;//発散量最大値(絶対値)(これがepsより小さくなったらループを突破)
+
+
+	do{
+		div_max = 0.0;
+
+		//step2
+
+		for (int ie = 0; ie < Mesh.nelem(); ie++) {
+			int i1 = Mesh.i1(ie);
+			int i2 = Mesh.i2(ie);
+			int i3 = Mesh.i3(ie);
+			int i4 = Mesh.i4(ie);
+			if (Mesh.scond(ie) != 1) {//非障害物領域
+				phi[ie] = -div[ie] / param.get_lambda(ie);//速度修正ポテンシャルの更新
+				p[ie] = p[ie] + phi[ie] / T.dt();//圧力の更新
+			}
+			else {//障害物領域
+				phi[ie] = 0.0;
+				p[ie] = 0.0;
+			}
 		}
 		for (int j = 0; j < node; j++) {
-			for (int ie = 0; ie < mesh.nelem(); ie++) {
-				int np = mesh.nbool1(ie, j);
-				int i1 = mesh.i1(ie);
-				int i2 = mesh.i2(ie);
-				int i3 = mesh.i3(ie);
-				int i4 = mesh.i4(ie);
-
-				if (mesh.ncond(np) == 1) {//dirichlet
-					A[np][np] = 1.0;
-					b[np] = phi[np];
-
+			for (int ie = 0; ie < Mesh.nelem(); ie++) {
+				int np = Mesh.nbool1(ie, j);
+				if (Mesh.scond(ie) != 1) {//非障害物領域
+					UU[np] += Cv[ie][j] * phi[ie];//修正量の計算
 				}
-				else {//内部
-					A[np][i1] = A[np][i1] + Em[ie][j][0] + t.dt() * (ADP.get_cx() * Amx[ie][j][0] + ADP.get_cy() * Amy[ie][j][0]) + t.dt() * ADP.get_alpha() * Dm[ie][j][0];
-					A[np][i2] = A[np][i2] + Em[ie][j][1] + t.dt() * (ADP.get_cx() * Amx[ie][j][1] + ADP.get_cy() * Amy[ie][j][1]) + t.dt() * ADP.get_alpha() * Dm[ie][j][1];
-					A[np][i3] = A[np][i3] + Em[ie][j][2] + t.dt() * (ADP.get_cx() * Amx[ie][j][2] + ADP.get_cy() * Amy[ie][j][2]) + t.dt() * ADP.get_alpha() * Dm[ie][j][2];
-					A[np][i4] = A[np][i4] + Em[ie][j][3] + t.dt() * (ADP.get_cx() * Amx[ie][j][3] + ADP.get_cy() * Amy[ie][j][3]) + t.dt() * ADP.get_alpha() * Dm[ie][j][3];
-					b[np] = b[np] + Em[ie][j][0] * phi[i1] + Em[ie][j][1] * phi[i2] + Em[ie][j][2] * phi[i3] + Em[ie][j][3] * phi[i4];
-				}
-				if (mesh.ncond(np) == 2) {//neumann
-					nn[np] = nn[np] + ADP.get_alpha() * (nx[np] * dphidx + ny[np] * dphidy);//今回は流出のみをあつかうので境界項＝0
-					b[np] = b[np] + nn[np];
+				else {//障害物領域
+					Vector2d c(0, 0);
+					UU[np] += c;
 				}
 			}
 		}
-		LU_solve(A, x, b);
-		for (int i = 0; i < x.size(); i++) {
-			phi[i] = x[i];
-		}
-		if (n % t.nsample() == 0) {
-			out.data_update(phi);
-			out.output_result_csv(n);
+		//速度の修正
+		for (int i = 0; i < Mesh.nnode(); i++) {
+			Vector2d O(0.0, 0.0);
+			if (Mesh.ncond(i) == 0) {//内部
+				//普通に計算
+				Utilde[i] = Utilde[i] + UU[i] / ff[i];
+				//v^(k+1)=v^k + UU/ff
+				//UU=Cv*phi^k
+			}
+			else if (Mesh.ncond(i) == 1) {//剛体内部
+				//0固定 
+				Utilde[i] = O;
+			}
+			else if (Mesh.ncond(i) == 2) {//流入壁面
+				//dirichlet 前ステップの値を引き継ぐ
+				Utilde[i] = UB[i];
+			}
+			else if (Mesh.ncond(i) == 3) {//流出壁面
+				//流出方向 neumann 条件　接線方向は既定なし
+				Utilde[i] = Utilde[i] + UU[i] / ff[i];
+			}
+			else if (Mesh.ncond(i) == 4) {//移動壁面
+				//壁面接線(非ゼロ)・法線方向(0) dirichlet 前ステップの値を引き継ぐ
+				Utilde[i] = UB[i];
+			}
+			else if (Mesh.ncond(i) == 5) {//滑りなし壁面
+				//壁面接線(0)・法線方向(0) dirichlet 
+				Utilde[i] = O;
+			}
+			else if (Mesh.ncond(i) == 6) {//滑りあり壁面
+				//壁面法線方向流速(0) dirichlet
+				//壁面接線方向流速勾配(法線方向)=0 neumann
+				if (nx[i] != 0 && ny[i] != 0) {//壁面の角
+					Utilde[i] = O;
+				}
+				else if (nx[i] != 0 && ny[i] == 0) {
+					Utilde[i][0] = 0.0;
+					Utilde[i][1] = Utilde[i][1] + UU[i][1] / ff[i];
+				}
+				else if (nx[i] == 0 && ny[i] != 0) {
+					Utilde[i][0] = Utilde[i][0] + UU[i][0] / ff[i];
+					Utilde[i][1] = 0.0;
+				}
+			}
+			UU[i] = O;//修正量の初期化
 		}
 
-	}
+		for (int i = 0; i < Mesh.nnode(); i++) {
+			v[i] = Utilde[i];//流速の更新
+		}
+		//step3
+		div.cal_divergence(v);//発散量の更新
 
+		div_max = div.max_div();//発散量の最大値を計算
+
+		nor++;
+	} while ((div_max > param.get_eps()) && (nor < param.get_nmax()));
+}
+double SOR::get_nor() {
+	return nor;
 }
