@@ -17,15 +17,17 @@ private:
 	Mesh2d& mesh;
 	NDNSparam& nsparam;
 	SORparam& sorparam;
-	Boundarycond& bc;
-	double coutant;
+	Boundarycond& BC;
+	int NOR;//同時緩和法反復回数
+	double max_div;//発散量の最大値
 
 public:
-	HSMAC_FEM(Velocity2d& v, Pressure& p, Time& T, Mesh2d& Mesh, NDNSparam& NSP, SORparam& SRP, Boundarycond& BC);
-	double Uxmax();//流速x成分最大値
-	double Uymax();//流速y成分最大値
-	double Pmax();//圧力P最大値
-	void view_parameters();//パラメーターの表示
+	HSMAC_FEM(Velocity2d& v, Pressure& p, Time& T, Mesh2d& Mesh, NDNSparam& NSP, SORparam& SRP, Boundarycond& bc);
+	void do_solution();//HSMAC法による計算の開始
+	double Uxmax();//流速x成分最大値(絶対値が一番大きい値の絶対値をつける前の値を返す)
+	double Uymax();//流速y成分最大値(絶対値が一番大きい値の絶対値をつける前の値を返す)
+	double Pmax();//圧力P最大値(絶対値が一番大きい値の絶対値をつける前の値を返す)
+	void view_parameters(int n);//パラメーターの表示
 	//
 
 };
@@ -45,11 +47,12 @@ private:
 
 	int node = 4;
 	int nor;//反復回数 Number of repetitions
-
+	double div_max;//発散量最大値(絶対値)(これがepsより小さくなったらループを突破)
 public:
 	SOR(SORparam& Param);
 	void do_calculation(Velocity2d& v, Pressure& p, Time& T, Mesh2d& Mesh, SORparam& param, Boundarycond& BC);
 	double get_nor();
+	double max_div();//発散量の最大値を返す
 
 };
 

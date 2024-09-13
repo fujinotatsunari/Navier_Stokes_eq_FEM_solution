@@ -6,6 +6,7 @@
 #include"Mesh.hpp"
 #include"param.hpp"
 #include"matrix.hpp"
+#include<chrono>
 #include<vector>
 #include<iostream>
 
@@ -327,11 +328,10 @@ void SOR::do_calculation(Velocity2d& v, Pressure& p, Time& T, Mesh2d& Mesh, SORp
 
 
 	nor = 0;//反復回数初期化
-	double div_max = 0.0;//発散量最大値(絶対値)(これがepsより小さくなったらループを突破)
-
+	div_max = 0.0;//発散量最大値(絶対値)(これがepsより小さくなったらループを突破)
 
 	do{
-		div_max = 0.0;
+		
 
 		//step2
 
@@ -416,9 +416,93 @@ void SOR::do_calculation(Velocity2d& v, Pressure& p, Time& T, Mesh2d& Mesh, SORp
 
 		div_max = div.max_div();//発散量の最大値を計算
 
-		nor++;
+		nor++;//反復回数の更新
 	} while ((div_max > param.get_eps()) && (nor < param.get_nmax()));
 }
 double SOR::get_nor() {
 	return nor;
+}
+double SOR::max_div() {
+	return div_max;
+}
+HSMAC_FEM::HSMAC_FEM(Velocity2d& v, Pressure& p, Time& T, Mesh2d& Mesh, NDNSparam& NSP, SORparam& SRP, Boundarycond& bc)
+	:V(v), P(p), t(T), mesh(Mesh), nsparam(NSP), sorparam(SRP), BC(bc)
+{
+
+}
+void HSMAC_FEM::do_solution() {
+	Predictor Vp;//流速予測子計算オブジェクト
+	SOR S(sorparam);//同時緩和法計算オブジェクト
+
+	//時間進行の開始
+	cout << "End of setting up initial condition" << endl;
+	cout << "scheme:  HSMAC FEM" << endl;
+	cout << "Caluculatoin Start !" << endl;
+	auto start= std::chrono::high_resolution_clock::now();//総計算時間 開始時刻取得
+	for (int n = 0; n <= t.nend(); n++) {
+		auto step_start = std::chrono::high_resolution_clock::now();//1step計算時間 開始時刻取得
+
+
+		Vp.euler_explicit(V, P, t, mesh, nsparam);//オイラー前進法による予測子算出
+		S.do_calculation(V, P, t, mesh, sorparam, BC);//同時緩和法による速度圧力修正
+		
+		NOR = S.get_nor();//同時緩和法反復回数の取得
+		max_div = S.max_div();
+
+		view_parameters(n);//計算パラメータの表示
+		auto step_end = std::chrono::high_resolution_clock::now();    // 1step終了時刻を取得
+		auto step_duration = std::chrono::duration_cast<std::chrono::seconds>(step_end - step_start);  // 1step計算時間を秒に変換
+		auto step_duration_sum = std::chrono::duration_cast<std::chrono::seconds>(step_end - start);  // 累計計算時間を秒に変換
+		cout << "Step No." << n << " :calculation time : " << step_duration.count() << " s" << endl;
+		cout << "Cumulative caluculation time: " << step_duration_sum.count() << " s" << endl;
+		
+		if (n % t.nsample() == 0) {//ステップ数が出力ステップ数のとき
+
+		}
+	}
+	cout << "Calculation End!" << endl;
+	auto end = std::chrono::high_resolution_clock::now();    // 終了時刻を取得
+	auto duration = std::chrono::duration_cast<std::chrono::seconds>(end - start);  // 総計算時間を秒に変換
+	cout << "Total caluculation time: " << duration.count() << " s" << endl;
+
+}
+double HSMAC_FEM::Uxmax() {
+	double maxUx = V[0][0];//流速最大値
+	double absmaxUx = fabs(V[0][0]);//流速最大値絶対値あり
+	for (int i = 0; i < mesh.nnode(); i++) {
+		if (absmaxUx < fabs(V[i][0])) {
+			absmaxUx = fabs(V[i][0]);
+			maxUx = V[i][0];
+		}
+	}
+	return maxUx;
+}
+double HSMAC_FEM::Uymax() {
+	double maxUy = V[0][1];//流速最大値
+	double absmaxUy = fabs(V[0][1]);//流速最大値絶対値あり
+	for (int i = 0; i < mesh.nnode(); i++) {
+		if (absmaxUy < fabs(V[i][1])) {
+			absmaxUy = fabs(V[i][1]);
+			maxUy = V[i][1];
+		}
+	}
+	return maxUy;
+}
+double HSMAC_FEM::Pmax() {
+	double maxP = P[0].v();//圧力最大値
+	double absmaxP = fabs(P[0].v());//圧力最大値絶対値あり
+	for (int ie = 0; ie < mesh.nelem(); ie++) {
+		if (absmaxP < fabs(P[ie].v())) {
+			absmaxP = fabs(P[ie].v());
+			maxP = P[ie].v();
+		}
+	}
+	return maxP;
+}
+void HSMAC_FEM::view_parameters(int n) {
+	cout << "Step No." << n << "    " << "Time = " << t.ntime(n) << " s" << endl;
+	cout << "UMAX: " << Uxmax() << " " << "VMAX: " << Uymax() << " " << "PMAX: " << Pmax() << endl;
+	cout << "SOR method Number of iterations = " << NOR << endl;
+	cout << "Maximum divergence = " << max_div << endl;
+
 }
