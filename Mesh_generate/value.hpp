@@ -5,14 +5,14 @@
 
 class Scalar2d {//二次元スカラー量クラス
 private:
-	double v;//スカラー量
+	double V;//スカラー量
 public:
 	Scalar2d();
 	Scalar2d(double V);
-
+	double v();
 	double& operator[](int i);//任意の整数値を添え字に取る
 	const double& operator[](int i) const;
-
+	Scalar2d operator-() const;
 	Scalar2d& operator=(const Scalar2d& V);
 	Scalar2d& operator=(const double V);
 	Scalar2d& operator+=(const Scalar2d& V);
@@ -21,6 +21,7 @@ public:
 Scalar2d operator+(const Scalar2d&, const Scalar2d&);
 Scalar2d operator-(const Scalar2d&, const Scalar2d&);
 Scalar2d operator*(const Scalar2d&, const Scalar2d&);
+
 Scalar2d operator*(const double, const Scalar2d& V);
 Scalar2d operator/(const Scalar2d& V, const double k);
 
@@ -54,11 +55,14 @@ public:
 	Vector2d& operator+=(const Vector2d& V);
 	Vector2d& operator-=(const Vector2d& V);
 };
+
 Vector2d operator+(const Vector2d&, const Vector2d&);
 Vector2d operator-(const Vector2d&, const Vector2d&);
 Vector2d operator*(const Vector2d&, const Vector2d&);//内積
 Vector2d operator*(const double k, const Vector2d& V);//スカラー積
+Vector2d operator*(const Vector2d& V, const double k);//スカラー積
 Vector2d operator*(const Scalar2d& k, const Vector2d& V);//スカラー積
+Vector2d operator*(const Vector2d& V, const Scalar2d& k);//スカラー積
 Scalar2d operator%(const Vector2d&, const Vector2d&);//クロス積(２次元のクロス積は実質スカラー)
 Vector2d operator/(const Vector2d& V, const double k);
 
@@ -83,6 +87,7 @@ public:
 	void cavity_init();//キャビティ流れの初期化(圧力編)
 	void backstep_init();//バックステップ流れの初期化
 };
+/*
 class PHI :public ScalarField2d {//移流拡散方程式の物理量phi
 private:
 	int nnode;//va配列の大きさnnodeに対応
@@ -95,6 +100,7 @@ public:
 	//void initialize_cosfunc();//cos関数型の初期条件
 
 };
+*/
 class Velocity2d :public VectorField2d {
 private:
 	int nnode;

@@ -1,5 +1,6 @@
 #include"mesh.hpp"
 #include"param.hpp"
+#include"value.hpp"
 #include<vector>
 #include<iostream>
 Node2d::Node2d() :no(0), x(0), y(0)
@@ -98,6 +99,7 @@ Mesh2d& Mesh2d::operator=(const Mesh2d& mesh) {
 	node_ = mesh.node_;
 	elem_ = mesh.elem_;
 	ncond_ = mesh.ncond_;
+	scond_ = mesh.scond_;
 	nbool1_ = mesh.nbool1_;
 	nbool3_ = mesh.nbool3_;
 	xb_ = mesh.xb_;
@@ -125,6 +127,7 @@ Mesh2d::Mesh2d(const Mesh2d& mesh)
 	node_ = mesh.node_;
 	elem_ = mesh.elem_;
 	ncond_ = mesh.ncond_;
+	scond_ = mesh.scond_;
 	nbool1_ = mesh.nbool1_;
 	nbool3_ = mesh.nbool3_;
 	xb_ = mesh.xb_;
@@ -174,6 +177,7 @@ void Mesh2d::setup() {
 
 	ncond_.resize(nnode_);
 	node_.resize(nnode_);
+	scond_.resize(nelem_);
 	elem_.resize(nelem_);
 }
 void Mesh2d::generate() {
@@ -230,12 +234,10 @@ void Mesh2d::generate() {
 			int i3 = nbool1_[ie][2];
 			int i4 = nbool1_[ie][3];
 
-			elem_[ie].setX((node_[i1].getX() + node_[i2].getX() + node_[i3].getX() + node_[i4].getX()) / 4);//要素重心のx座標
-			elem_[ie].setY((node_[i1].getY() + node_[i2].getY() + node_[i3].getY() + node_[i4].getY()) / 4);//要素重心のy座標
-			double S;
-			S = ((node_[i3].getX() - node_[i1].getX()) * (node_[i4].getY() - node_[i2].getY())
-				- (node_[i4].getX() - node_[i2].getX()) * (node_[i3].getY() - node_[i1].getY())) / 4;//要素四角形の面積を求める
-
+			elem_[ie].setX(x(i1) + x(i2) + x(i3) + x(i4) / 4);//要素重心のx座標
+			elem_[ie].setY(y(i1) + y(i2) + y(i3) + y(i4) / 4);//要素重心のy座標
+			double S;//要素面積
+			S = area(i1, i2, i3, i4);//算出
 			elem_[ie].setSe(S);
 
 		}
@@ -267,6 +269,9 @@ void Mesh2d::generate() {
 				ncond_[np] = 0;
 			}
 		}
+	}
+	for (int ie = 0; ie < nelem_; ie++) {
+		scond_[ie] = 0;
 	}
 
 }
@@ -362,6 +367,88 @@ int Mesh2d::nbool3(int ie, int np) {
 int Mesh2d::ncond(int i) {
 	return ncond_[i];
 }
+int Mesh2d::scond(int i) {
+	return scond_[i];
+}
+double Mesh2d::length(int i1, int i2) {
+	double L = 0.0;
+	double x1 = node_[i1].getX();
+	double x2 = node_[i2].getX();
+	double y1 = node_[i1].getY();
+	double y2 = node_[i2].getY();
+	L = sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+	return L;
+}
+double Mesh2d::area(int E1, int E2) {
+	int e11 = nbool3(E1, 0);//E1の下の要素番号
+	int e12 = nbool3(E1, 1);//E1の右の要素番号
+	int e13 = nbool3(E1, 2);//E1の上の要素番号
+	int e14 = nbool3(E1, 3);//E1の左の要素番号
+	//要素重心の座標
+	double x1 = eX(E1);
+	double x2 = eX(E2);
+	double y1 = eY(E1);
+	double y2 = eY(E2);
+
+	double x3, x4, y3, y4;//辺の両端の座標
+	int n1, n2;//辺の両端の節点番号
+	if (e11 == E2) {//E2はE1の下側
+		n1 = nbool1(E1, 0);//要素左下の点
+		n2 = nbool1(E1, 1);//要素右下の点
+	}
+	else if (e12 == E2) {//E2はE1の右側
+		n1 = nbool1(E1, 1);//要素右下の点
+		n2 = nbool1(E1, 2);//要素右上の点
+	}
+	else if (e13 == E2) {//E2はE1の上側
+		n1 = nbool1(E1, 2);//要素右上の点
+		n2 = nbool1(E1, 3);//要素左上の点
+	}
+	else if (e14 == E2) {//E2はE1の左側
+		n1 = nbool1(E1, 3);//要素左上の点
+		n2 = nbool1(E1, 0);//要素左下の点
+	}
+	else {
+		cout << "E2はE1に隣接してません" << endl;
+		exit(-1);
+	}
+	//辺両端の座標
+	x3 = x(n1);
+	y3 = y(n1);
+	x4 = x(n2);
+	y4 = y(n2);
+	Scalar2d S;
+	//位置ベクトル
+	Vector2d V1(x1, y1);
+	Vector2d V2(x2, y2);
+	Vector2d V3(x3, y3);
+	Vector2d V4(x4, y4);
+
+	S = 0.5 * ((V3 - V1) % (V4 - V2));
+	return S.v();
+
+}
+double Mesh2d::area(int n1, int n2, int n3, int n4) {
+
+	Scalar2d S;
+	double x1 = x(n1);
+	double x2 = x(n2);
+	double x3 = x(n3);
+	double x4 = x(n4);
+	double y1 = y(n1);
+	double y2 = y(n2);
+	double y3 = y(n3);
+	double y4 = y(n4);
+	//位置ベクトル
+	Vector2d V1(x1, y1);
+	Vector2d V2(x2, y2);
+	Vector2d V3(x3, y3);
+	Vector2d V4(x4, y4);
+
+	S = 0.5 * ((V3 - V1) % (V4 - V2));
+	return S.v();
+
+}
 CavityMesh2d::CavityMesh2d(NodeP& NP, Boundarycond& BC)
 	:Mesh2d(NP, BC)
 {
@@ -399,16 +486,16 @@ void CavityMesh2d::generate()
 			nbool1_[ie][3] = i4;
 
 			nbool3_[ie][2] = ie + xelem_;//上側要素
-			if (j == yelem_ - 1) nbool3_[ie][2] = -1;//領域上端
+			if (j == yelem_ - 1) nbool3_[ie][2] = -1;//領域外
 
 			nbool3_[ie][0] = ie - xelem_;//下側要素
-			if (j == 0) nbool3_[ie][0] = -1;//領域下端
+			if (j == 0) nbool3_[ie][0] = -1;//領域外
 
 			nbool3_[ie][3] = ie - 1;//左側要素
-			if (i == 0) nbool3_[ie][3] = -1;//領域左端
+			if (i == 0) nbool3_[ie][3] = -1;//領域外
 
 			nbool3_[ie][1] = ie + 1;//右側要素
-			if (i == xelem_ - 1) nbool3_[ie][1] = -1;//領域右端
+			if (i == xelem_ - 1) nbool3_[ie][1] = -1;//領域外
 		}
 	}
 
@@ -422,14 +509,11 @@ void CavityMesh2d::generate()
 			int i3 = nbool1_[ie][2];
 			int i4 = nbool1_[ie][3];
 
-			elem_[ie].setX((node_[i1].getX() + node_[i2].getX() + node_[i3].getX() + node_[i4].getX()) / 4);//要素重心のx座標
-			elem_[ie].setY((node_[i1].getY() + node_[i2].getY() + node_[i3].getY() + node_[i4].getY()) / 4);//要素重心のy座標
-			double S;
-			S = ((node_[i3].getX() - node_[i1].getX()) * (node_[i4].getY() - node_[i2].getY())
-				- (node_[i4].getX() - node_[i2].getX()) * (node_[i3].getY() - node_[i1].getY())) / 4;//要素四角形の面積を求める
-
+			elem_[ie].setX(x(i1) + x(i2) + x(i3) + x(i4) / 4);//要素重心のx座標
+			elem_[ie].setY(y(i1) + y(i2) + y(i3) + y(i4) / 4);//要素重心のy座標
+			double S;//要素面積
+			S = area(i1, i2, i3, i4);//算出
 			elem_[ie].setSe(S);
-
 		}
 	}
 
@@ -478,6 +562,12 @@ void CavityMesh2d::generate()
 			}
 
 		}
+		
+	}
+	//物体要素フラグの設定
+	
+	for (int ie = 0; ie < nelem_; ie++) {
+		scond_[ie] = 0;
 	}
 
 }
@@ -544,12 +634,10 @@ void BackstepMesh2d::generate() {
 			int i3 = nbool1_[ie][2];
 			int i4 = nbool1_[ie][3];
 
-			elem_[ie].setX((node_[i1].getX() + node_[i2].getX() + node_[i3].getX() + node_[i4].getX()) / 4);//要素重心のx座標
-			elem_[ie].setY((node_[i1].getY() + node_[i2].getY() + node_[i3].getY() + node_[i4].getY()) / 4);//要素重心のy座標
-			double S;
-			S = ((node_[i3].getX() - node_[i1].getX()) * (node_[i4].getY() - node_[i2].getY())
-				- (node_[i4].getX() - node_[i2].getX()) * (node_[i3].getY() - node_[i1].getY())) / 4;//要素四角形の面積を求める
-
+			elem_[ie].setX(x(i1) + x(i2) + x(i3) + x(i4) / 4);//要素重心のx座標
+			elem_[ie].setY(y(i1) + y(i2) + y(i3) + y(i4) / 4);//要素重心のy座標
+			double S;//要素面積
+			S = area(i1, i2, i3, i4);//算出
 			elem_[ie].setSe(S);
 
 		}
@@ -611,14 +699,33 @@ void BackstepMesh2d::generate() {
 			int np = i + xnode_ * j;
 			if (x(np) <= (hx + xb_)&& y(np) <= (hy + yb_)) {
 				//段差の部分を探る
-				ncond_[np] = 1;//壁面内部
+				ncond_[np] = 1;//剛体内部
 				if (x(np + 1) > (hx + xb_)) {
-					ncond_[np] = Bcond_.getBCflagC();
+					ncond_[np] = Bcond_.getBCflagC();//物体壁面
 				}
 				if (y(np + xnode_) > (hy + yb_)) {
-					ncond_[np] = Bcond_.getBCflagC();
+					ncond_[np] = Bcond_.getBCflagC();//物体壁面
 				}
 			}
 		}
+	}
+	for (int ie = 0; ie < nelem_; ie++) {
+		scond_[ie] = 0;
+	}
+	for (int ie = 0; ie < nelem_; ie++) {
+		int i1 = nbool1_[ie][0];
+		int i2 = nbool1_[ie][1];
+		int i3 = nbool1_[ie][2];
+		int i4 = nbool1_[ie][3];
+
+		if (ncond(i1) == 1 || ncond(i2) == 1 || ncond(i3) == 1 || ncond(i4) == 1) {
+			//要素内の点に剛体内部のフラグ(1)が立つ
+			scond_[ie] = 1;
+		}
+		if (ncond(i1) != 0 && ncond(i2) != 0 && ncond(i3) != 0 && ncond(i4) != 0) {
+			//要素内のすべての点が壁面のフラグ
+			scond_[ie] = 1;
+		}
+
 	}
 }

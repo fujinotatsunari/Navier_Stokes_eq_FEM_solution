@@ -69,13 +69,16 @@ protected:
 	Boundarycond& Bcond_;
 	vector<Node2d> node_;
 	vector<Element2d> elem_;
-	vector<int> ncond_;//節点境界フラグ
-	//境界条件フラグの設定
-	//ncond:  0:内部,	1:剛体壁面(流入流出なし),
+	vector<int> ncond_;//節点境界条件フラグ
+	//節点境界条件フラグの設定
+	//ncond:  0:内部,	1:剛体壁面内部点(物体要素内部の点),
 			//2:流入壁面(dirichlet)　3:流出壁面(neumann)
 			//4:移動壁面条件(壁面接線方向に流速固定値1),5:滑りなし条件(壁面において(u,v)=(0,0))
-			//6:滑りあり条件(dvx/dy=0,vy=0)
+			//6:滑りあり条件(法線方向の流速0 接線方向の流速勾配(法線方向)0)
 	
+	vector<int> scond_;//要素物体フラグ
+	//scond: 0:内部 ,1:障害物要素
+
 	vector<vector<int>> nbool1_;//nbool[要素番号][要素内節点番号]=全体節点番号
 	vector<vector<int>> nbool3_;//nbool3[要素番号][ローカルな要素番号]=全体要素番号 ::ある要素に隣接する要素の番号
 	double xb_, xt_, yb_, yt_, dx_, dy_, Lx_, Ly_;
@@ -116,8 +119,11 @@ public:
 	int e2(int ie);//nbool3[ie][1]に対応する要素
 	int e3(int ie);//nbool3[ie][2]に対応する要素
 	int e4(int ie);//nbool3[ie][3]に対応する要素
-	int ncond(int i);
-
+	int ncond(int i);//節点にあたえられた境界条件フラグを返す
+	int scond(int ie);//要素に与えられた物体フラグを返す
+	double length(int i1, int i2);//2点の線分の長さ
+	double area(int e1, int e2);//2要素とそれを挟む辺の両端がなす面積
+	double area(int i1, int i2, int i3, int i4);//4点からなる四角形の面積
 	void setup();//初期化
 	virtual void generate();//等間隔グリッドの作成
 	//void generate_cylinder_grid();//円柱周りグリッドの作成(後々作成　)
@@ -167,6 +173,10 @@ public:
 	void generate()override;//backstep流れ用のグリッド
 
 };
+class SquarePillarMesh2d :public Mesh2d {
+
+};
+
 /*
 class CylinderMesh2d :public Mesh2d {//円柱流れ用のMeshクラス
 private:
