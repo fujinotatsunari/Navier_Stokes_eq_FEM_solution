@@ -42,6 +42,12 @@ public:
 	virtual void output_csv();//csvの出力
 	virtual void output_dat();//datの出力
 	virtual void output_condition();//パラメータファイルの出力
+	//出力の仕様変更
+	//原則１ファイルが1個の多次元(あるいは1次元)配列に対応するようにする
+	// ncond.csv scond.csv U.csv V.csv P.csv 　<=　1次元配列
+	// node.csv:節点の(x,y)座標配列　 snode.csv：要素重心の(x,y)座標配列  <=2次元配列
+	// nbool1.csv :nbool1のデータ nbool3.csv :nbool3のデータ <=nelem*4 配列
+	// param.csv <=空間パラメータと境界条件の保存 あとモデル名
 	//void data_update();//データの更新
 	
 };

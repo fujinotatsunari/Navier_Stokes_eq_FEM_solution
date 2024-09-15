@@ -305,8 +305,8 @@ void Outputcavitymesh::output_csv() {
 	str1 = directory_setup();//C:///.../data_(i)
 	str2 = "mesh_data_box";
 	str3 = make_directories(str1, str2);//C:/..../data_(i)/mesh_data_box
-	filename1 = str3 + "/" + "Ux.csv";//x方向流速
-	filename2 = str3 + "/" + "Vx.csv";//y方向流速
+	filename1 = str3 + "/" + "U.csv";//x方向流速
+	filename2 = str3 + "/" + "V.csv";//y方向流速
 	filename3 = str3 + "/" + "P.csv";//圧力
 	filename4 = str3 + "/" + "BC.csv";//境界条件
 	filename5 = str3 + "/" + "param.csv";//パラメーター
