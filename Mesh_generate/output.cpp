@@ -299,6 +299,11 @@ void Outputcavitymesh::output_csv() {
 	string filename3;
 	string filename4;
 	string filename5;
+	string filename6;
+	string filename7;
+	string filename8;
+	string filename9;
+	string filename10;
 	string str1;
 	string str2;
 	string str3;
@@ -308,85 +313,81 @@ void Outputcavitymesh::output_csv() {
 	filename1 = str3 + "/" + "U.csv";//x方向流速
 	filename2 = str3 + "/" + "V.csv";//y方向流速
 	filename3 = str3 + "/" + "P.csv";//圧力
-	filename4 = str3 + "/" + "BC.csv";//境界条件
-	filename5 = str3 + "/" + "param.csv";//パラメーター
+	filename4 = str3 + "/" + "ncond.csv";//節点境界条件データ
+	filename5 = str3 + "/" + "scond.csv";//要素条件データ
+	filename6 = str3 + "/" + "node.csv";//節点座標配列
+	filename7 = str3 + "/" + "snode.csv";//要素重心座標配列
+	filename8 = str3 + "/" + "nbool1.csv";//nbool1データ
+	filename9 = str3 + "/" + "nbool3.csv";//nbool3データ
+	filename10 = str3 + "/" + "param.csv";//パラメーター
+
 	ofstream outputfile1(filename1);
 	ofstream outputfile2(filename2);
 	ofstream outputfile3(filename3);
 	ofstream outputfile4(filename4);
 	ofstream outputfile5(filename5);
+	ofstream outputfile6(filename6);
+	ofstream outputfile7(filename7);
+	ofstream outputfile8(filename8);
+	ofstream outputfile9(filename9);
+	ofstream outputfile10(filename10);
 
-	for (int j = 0; j < mesh.ynode(); j++) {
-		for (int i = 0; i < mesh.xnode(); i++) {
-			int np = i + mesh.xnode() * j;
-			nodecopy[i][j] = V[np][0];//x方向流速
-		}
-	}
-	for (int j = 0; j < mesh.ynode(); j++) {
-		for (int i = 0; i < mesh.xnode(); i++) {
-			outputfile1 << nodecopy[i][j] << ",";
-		}
-		outputfile1 << "\n";
+	for (int i = 0; i < mesh.nnode(); i++) {
+		outputfile1 << V[i][0] << "," << "\n";//x方向流速
 	}
 	outputfile1.close();
 
-	for (int j = 0; j < mesh.ynode(); j++) {
-		for (int i = 0; i < mesh.xnode(); i++) {
-			int np = i + mesh.xnode() * j;
-			nodecopy[i][j] = V[np][1];//y方向流速
-		}
-	}
-	for (int j = 0; j < mesh.ynode(); j++) {
-		for (int i = 0; i < mesh.xnode(); i++) {
-			outputfile2 << nodecopy[i][j] << ",";
-		}
-		outputfile2 << "\n";
+	for (int i = 0; i < mesh.nnode(); i++) {
+		outputfile2 << V[i][1] << "," << "\n";//y方向流速
 	}
 	outputfile2.close();
 
-	for (int j = 0; j < mesh.yelem(); j++) {
-		for (int i = 0; i < mesh.xelem(); i++) {
-			int ie = i + mesh.xelem() * j;
-			elemcopy[i][j] = P[ie][0];//圧力
-		}
-	}
-	for (int j = 0; j < mesh.yelem(); j++) {
-		for (int i = 0; i < mesh.xelem(); i++) {
-			outputfile3 << elemcopy[i][j] << ",";
-		}
-		outputfile3 << "\n";
+	for (int ie = 0; ie < mesh.nelem(); ie++) {
+		outputfile3 << P[ie][0] << "," << "\n";//圧力
 	}
 	outputfile3.close();
 
-	for (int j = 0; j < mesh.ynode(); j++) {
-		for (int i = 0; i < mesh.xnode(); i++) {
-			int np = i + mesh.xnode() * j;
-			nodecopy[i][j] = mesh.ncond(np);//境界条件
-		}
-	}
-	for (int j = 0; j < mesh.ynode(); j++) {
-		for (int i = 0; i < mesh.xnode(); i++) {
-			outputfile4 << nodecopy[i][j] << ",";
-		}
-		outputfile4 << "\n";
+	for (int i = 0; i < mesh.nnode(); i++) {
+		outputfile4 << mesh.ncond(i) << "," << "\n";//節点境界条件
 	}
 	outputfile4.close();
-	/*
-	outputfile << "xb=" << mesh.xb() << " " << "xt=" << mesh.xt() << "\n";
-	outputfile << "yb=" << mesh.yb() << " " << "yt=" << mesh.yt() << "\n";
-	outputfile << "dx=" << mesh.dx() << " " << "dy=" << mesh.dy() << "\n";
-	outputfile << "xelem=" << mesh.xelem() << " " << "yelem=" << mesh.yelem() << "\n";
-	outputfile << "nelem=" << mesh.nelem() << " " << "nnode=" << mesh.nnode() << "\n";
-	outputfile << "flagU=" << BC.getBCflagU() << " " << "flagD=" << BC.getBCflagD() << " " << "flagL=" << BC.getBCflagL() << " " << "flagR=" << BC.getBCflagR() << "\n";
-	outputfile << "\n";
-	*/
-	outputfile5 << mesh.xb() << "," << mesh.xt() << "," << mesh.yb() << "," << mesh.yt() << "," << "\n";
-	outputfile5 << mesh.dx() << "," << mesh.dy() << "," << "," << "," << "\n";
-	outputfile5 << mesh.xelem() << "," << mesh.yelem() << "," << "," << ", " << "\n";
-	outputfile5 << mesh.nelem() << "," << mesh.nnode() << "," << "," << ", " << "\n";
-	outputfile5 << BC.getBCflagL() << "," << BC.getBCflagR() << "," << BC.getBCflagU() << "," << BC.getBCflagD() << "," << -1 << "," << "\n";
+
+	for (int ie = 0; ie < mesh.nelem(); ie++) {
+		outputfile5 << mesh.scond(ie) << "," << "\n";//要素条件
+	}
 	outputfile5.close();
+
+	for (int i = 0; i < mesh.nnode(); i++) {
+		outputfile6 << mesh.x(i) << "," << mesh.y(i) << "," << "\n";//節点座標
+	}
+	outputfile6.close();
+
+	for (int ie = 0; ie < mesh.nelem(); ie++) {
+		outputfile7 << mesh.eX(ie) << "," << mesh.eY(ie) << "," << "\n";//要素重心座標
+	}
+	outputfile7.close();
+
+	for (int ie = 0; ie < mesh.nelem(); ie++) {
+		outputfile8 << mesh.i1(ie) << "," << mesh.i2(ie) << "," << mesh.i3(ie) << "," << mesh.i4(ie) << "," << "\n";//nbool1
+	}
+	outputfile8.close();
+
+	for (int ie = 0; ie < mesh.nelem(); ie++) {
+		outputfile9 << mesh.e1(ie) << "," << mesh.e2(ie) << "," << mesh.e3(ie) << "," << mesh.e4(ie) << "," << "\n";//nbool3
+	}
+	outputfile9.close();
+
+	outputfile10 << mesh.xb() << "," << mesh.xt() << "," << mesh.yb() << "," << mesh.yt() << "," << "," << "\n";
+	outputfile10 << mesh.dx() << "," << mesh.dy() << "," << "," << "," << "," << "\n";
+	outputfile10 << mesh.xelem() << "," << mesh.yelem() << "," << mesh.xnode() << "," << mesh.ynode() << "," << "," << "\n";
+	outputfile10 << mesh.nelem() << "," << mesh.nnode() << "," << "," << "," << "," << "\n";
+	outputfile10 << BC.getBCflagL() << "," << BC.getBCflagR() << "," << BC.getBCflagU() << "," << BC.getBCflagD() << "," << -1 << "," << "\n";
+	outputfile10.close();
+	
+
+
 }
+/*
 void Outputcavitymesh::output_dat() {
 	string filename1;
 	string filename2;
@@ -454,6 +455,7 @@ void Outputcavitymesh::output_dat() {
 	outputfile3.close();
 
 }
+*/
 void Outputcavitymesh::output_condition() {
 	string filename;
 	string str1;
@@ -473,6 +475,182 @@ void Outputcavitymesh::output_condition() {
 	outputfile << "xelem=" << mesh.xelem() << " " << "yelem=" << mesh.yelem() << "\n";
 	outputfile << "nelem=" << mesh.nelem() << " " << "nnode=" << mesh.nnode() << "\n";
 	outputfile << "flagU=" << BC.getBCflagU() << " " << "flagD=" << BC.getBCflagD() << " " << "flagL=" << BC.getBCflagL() << " " << "flagR=" << BC.getBCflagR() << "\n";
+	outputfile << "\n";
+
+	outputfile.close();
+}
+Outputbackstepmesh::Outputbackstepmesh(Mesh2d& Mesh, Boundarycond& Bc, Velocity2d& v, Pressure& p)
+	:OutputData(Mesh, Bc, v, p)
+{
+
+}
+string Outputbackstepmesh::directory_setup() {
+	string dirname0 = "C:";
+	string dirname1 = "Result";
+	string dirname2 = "2d_Navier_Stokes_eq";
+	string dirname3 = "Mesh_data_box";//calculation or mesh
+	string dirname4 = dir1;
+	string str;
+	string str1;
+	string year;
+	string month;
+	string day;
+
+	time_t timer;
+	struct tm local_time;
+	timer = time(NULL);
+	localtime_s(&local_time, &timer);
+	struct stat statBuf;
+
+	str = make_directories(make_directories(make_directories(make_directories(dirname0, dirname1), dirname2), dirname3), dirname4);
+
+	year = to_string(local_time.tm_year + 1900);
+	month = to_string(local_time.tm_mon + 1);
+	day = to_string(local_time.tm_mday);
+
+	str1 = year + month + day;
+	str = make_directories(str, str1);//C:/..../day
+
+	int check = 0;
+	if (Filestage == 0) {//計算開始後初めて保存場所を作成
+		for (int i = 0; check == 0; i++) {
+			str1 = str + "/" + "data_" + to_string(i);//C:/../data_i
+			//cout << str1 << endl;
+			if (stat(str1.c_str(), &statBuf) != 0) {
+				//data_iがそんざいしないとき
+				str1 = "data_" + to_string(i);
+				str = make_directories(str, str1);
+				//cout << str << "を作成" <<  endl;
+				check = 1;
+				dir = str;
+				Filestage = 1;
+				return str;
+			}
+			else {
+				//data_iがそんざいするときiをインクリメント
+			}
+		}
+	}
+	else if (Filestage == 1) {//保存場所が作成済み
+
+		return dir;
+	}
+	else {
+		exit(-1);
+	}
+}
+
+void Outputbackstepmesh::output_csv() {
+	string filename1;
+	string filename2;
+	string filename3;
+	string filename4;
+	string filename5;
+	string filename6;
+	string filename7;
+	string filename8;
+	string filename9;
+	string filename10;
+	string str1;
+	string str2;
+	string str3;
+	str1 = directory_setup();//C:///.../data_(i)
+	str2 = "mesh_data_box";
+	str3 = make_directories(str1, str2);//C:/..../data_(i)/mesh_data_box
+	filename1 = str3 + "/" + "U.csv";//x方向流速
+	filename2 = str3 + "/" + "V.csv";//y方向流速
+	filename3 = str3 + "/" + "P.csv";//圧力
+	filename4 = str3 + "/" + "ncond.csv";//節点境界条件データ
+	filename5 = str3 + "/" + "scond.csv";//要素条件データ
+	filename6 = str3 + "/" + "node.csv";//節点座標配列
+	filename7 = str3 + "/" + "snode.csv";//要素重心座標配列
+	filename8 = str3 + "/" + "nbool1.csv";//nbool1データ
+	filename9 = str3 + "/" + "nbool3.csv";//nbool3データ
+	filename10 = str3 + "/" + "param.csv";//パラメーター
+
+	ofstream outputfile1(filename1);
+	ofstream outputfile2(filename2);
+	ofstream outputfile3(filename3);
+	ofstream outputfile4(filename4);
+	ofstream outputfile5(filename5);
+	ofstream outputfile6(filename6);
+	ofstream outputfile7(filename7);
+	ofstream outputfile8(filename8);
+	ofstream outputfile9(filename9);
+	ofstream outputfile10(filename10);
+
+	for (int i = 0; i < mesh.nnode(); i++) {
+		outputfile1 << V[i][0] << "," << "\n";//x方向流速
+	}
+	outputfile1.close();
+
+	for (int i = 0; i < mesh.nnode(); i++) {
+		outputfile2 << V[i][1] << "," << "\n";//y方向流速
+	}
+	outputfile2.close();
+
+	for (int ie = 0; ie < mesh.nelem(); ie++) {
+		outputfile3 << P[ie][0] << "," << "\n";//圧力
+	}
+	outputfile3.close();
+
+	for (int i = 0; i < mesh.nnode(); i++) {
+		outputfile4 << mesh.ncond(i) << "," << "\n";//節点境界条件
+	}
+	outputfile4.close();
+
+	for (int ie = 0; ie < mesh.nelem(); ie++) {
+		outputfile5 << mesh.scond(ie) << "," << "\n";//要素条件
+	}
+	outputfile5.close();
+
+	for (int i = 0; i < mesh.nnode(); i++) {
+		outputfile6 << mesh.x(i) << "," << mesh.y(i) << "," << "\n";//節点座標
+	}
+	outputfile6.close();
+
+	for (int ie = 0; ie < mesh.nelem(); ie++) {
+		outputfile7 << mesh.eX(ie) << "," << mesh.eY(ie) << "," << "\n";//要素重心座標
+	}
+	outputfile7.close();
+
+	for (int ie = 0; ie < mesh.nelem(); ie++) {
+		outputfile8 << mesh.i1(ie) << "," << mesh.i2(ie) << "," << mesh.i3(ie) << "," << mesh.i4(ie) << "," << "\n";//nbool1
+	}
+	outputfile8.close();
+
+	for (int ie = 0; ie < mesh.nelem(); ie++) {
+		outputfile9 << mesh.e1(ie) << "," << mesh.e2(ie) << "," << mesh.e3(ie) << "," << mesh.e4(ie) << "," << "\n";//nbool3
+	}
+	outputfile9.close();
+
+	outputfile10 << mesh.xb() << "," << mesh.xt() << "," << mesh.yb() << "," << mesh.yt() << "," << "," << "\n";
+	outputfile10 << mesh.dx() << "," << mesh.dy() << "," << "," << "," << "," << "\n";
+	outputfile10 << mesh.xelem() << "," << mesh.yelem() << "," << mesh.xnode() << "," << mesh.ynode() << "," << "," << "\n";
+	outputfile10 << mesh.nelem() << "," << mesh.nnode() << "," << "," << "," << "," << "\n";
+	outputfile10 << BC.getBCflagL() << "," << BC.getBCflagR() << "," << BC.getBCflagU() << "," << BC.getBCflagD() << "," << BC.getBCflagC() << "," << "\n";
+	outputfile10.close();
+
+}
+void Outputbackstepmesh::output_condition() {
+	string filename;
+	string str1;
+	string str2;
+	string str3;
+	str1 = directory_setup();//C:///.../data_(i)
+	str2 = "condition";
+	str3 = make_directories(str1, str2);//C:/..../data_(i)/condition
+	filename = str3 + "/" + "condition.txt";
+
+	ofstream outputfile(filename);
+
+
+	outputfile << "xb=" << mesh.xb() << " " << "xt=" << mesh.xt() << "\n";
+	outputfile << "yb=" << mesh.yb() << " " << "yt=" << mesh.yt() << "\n";
+	outputfile << "dx=" << mesh.dx() << " " << "dy=" << mesh.dy() << "\n";
+	outputfile << "xelem=" << mesh.xelem() << " " << "yelem=" << mesh.yelem() << "\n";
+	outputfile << "nelem=" << mesh.nelem() << " " << "nnode=" << mesh.nnode() << "\n";
+	outputfile << "flagU=" << BC.getBCflagU() << " " << "flagD=" << BC.getBCflagD() << " " << "flagL=" << BC.getBCflagL() << " " << "flagR=" << BC.getBCflagR() << "flagC=" << BC.getBCflagC() << "\n";
 	outputfile << "\n";
 
 	outputfile.close();

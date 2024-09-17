@@ -174,7 +174,23 @@ public:
 
 };
 class SquarePillarMesh2d :public Mesh2d {
-
+private:
+	double hx, hy;//長方形角柱の辺の長さ
+	double ox, oy;//角柱の中心座標
+	/* 角柱流れの図
+	* 　　　　　　　
+	* ->|====================================|->
+	* ->|     hx                             |->
+	* ->|     ___                            |->
+	* ->|    |   |                           |->
+	* ->|    |___| hy                        |->
+	* ->|                                    |->
+	* ->|                                    |->
+	* ->|====================================|->
+	*/
+public:
+	SquarePillarMesh2d(NodeP& NP, Boundarycond& BC);
+	void generate()override;//角柱流れ用のグリッド
 };
 
 /*

@@ -18,8 +18,8 @@ protected:
 	vector<vector<double>> nodecopy;//Ux,Uy,BCのcsv用の配列
 	vector<vector<double>> elemcopy;//Pのcsv用の配列
 	Mesh2d& mesh;
-	Velocity2d V;
-	Pressure P;
+	Velocity2d& V;
+	Pressure& P;
 	Boundarycond& BC;
 	string dir;//ディレクトリdata_nの位置
 public:
@@ -47,7 +47,7 @@ public:
 	// ncond.csv scond.csv U.csv V.csv P.csv 　<=　1次元配列
 	// node.csv:節点の(x,y)座標配列　 snode.csv：要素重心の(x,y)座標配列  <=2次元配列
 	// nbool1.csv :nbool1のデータ nbool3.csv :nbool3のデータ <=nelem*4 配列
-	// param.csv <=空間パラメータと境界条件の保存 あとモデル名
+	// param.csv <=空間パラメータと境界条件の保存 あとモデル
 	//void data_update();//データの更新
 	
 };
@@ -59,7 +59,17 @@ public:
 	Outputcavitymesh(Mesh2d& Mesh, Boundarycond& Bc, Velocity2d& v, Pressure& p);
 	string directory_setup() override;
 	void output_csv() override;
-	void output_dat() override;
+	//void output_dat() override;
+	void output_condition() override;
+};
+class Outputbackstepmesh :public OutputData {
+private:
+	string dir1 = "backstep";
+public:
+	Outputbackstepmesh(Mesh2d& Mesh, Boundarycond& Bc, Velocity2d& v, Pressure& p);
+	string directory_setup() override;
+	void output_csv() override;
+	//void output_dat() override;
 	void output_condition() override;
 };
 

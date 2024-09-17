@@ -729,3 +729,165 @@ void BackstepMesh2d::generate() {
 
 	}
 }
+SquarePillarMesh2d::SquarePillarMesh2d(NodeP& NP, Boundarycond& BC) 
+	:Mesh2d(NP, BC),hx(0),hy(0),ox(0),oy(0)
+{
+	cout << "角柱周り流れMesh生成" << endl;
+	cout << "角柱のx方向長さ hx->";
+	cin >> hx;
+	cout << "角柱のy方向長さ hy->";
+	cin >> hy;
+
+	ox = xb() + Lx() / 4;
+	oy = yb() + Ly() / 2;
+
+}
+void SquarePillarMesh2d::generate() {
+	//節点座標の計算
+	for (int j = 0; j < ynode_; j++) {
+		for (int i = 0; i < xnode_; i++) {
+			int np = i + xnode_ * j;
+			node_[np].setNo(i);//節点番号の設定
+			node_[np].setX(dx_ * (double)i + xb_);//節点座標xの設定
+			node_[np].setY(dy_ * (double)j + yb_);//節点座標yの設定
+
+			if (i == 0) node_[np].setX(xb_);//x左端の補正
+			if (i == xnode_ - 1) node_[np].setX(xt_);//x右端の補正
+			if (j == 0) node_[np].setY(yb_);//y下端の補正
+			if (j == ynode_ - 1) node_[np].setY(yt_);//y上端の補正
+		}
+	}
+	//nbool1とnbool3の割当
+	for (int j = 0; j < yelem_; j++) {
+		for (int i = 0; i < xelem_; i++) {
+			int ie = i + xelem_ * j;
+
+			int i1 = i + xnode_ * j;//要素の左下点の節点番号
+			int i2 = i1 + 1;//要素の右下点の節点番号
+			int i4 = i1 + xnode_;//要素の左上点の節点番号
+			int i3 = i4 + 1;//要素の右上点の節点番号
+
+			nbool1_[ie][0] = i1;
+			nbool1_[ie][1] = i2;
+			nbool1_[ie][2] = i3;
+			nbool1_[ie][3] = i4;
+
+			nbool3_[ie][2] = ie + xelem_;//上側要素
+			if (j == yelem_ - 1) nbool3_[ie][2] = -1;//領域上端
+
+			nbool3_[ie][0] = ie - xelem_;//下側要素
+			if (j == 0) nbool3_[ie][0] = -1;//領域下端
+
+			nbool3_[ie][3] = ie - 1;//左側要素
+			if (i == 0) nbool3_[ie][3] = -1;//領域左端
+
+			nbool3_[ie][1] = ie + 1;//右側要素
+			if (i == xelem_ - 1) nbool3_[ie][1] = -1;//領域右端
+		}
+	}
+
+	//要素座標の設定
+	for (int j = 0; j < yelem_; j++) {
+		for (int i = 0; i < xelem_; i++) {
+			int ie = i + xelem_ * j;
+			elem_[ie].setNo(ie);
+			int i1 = nbool1_[ie][0];
+			int i2 = nbool1_[ie][1];
+			int i3 = nbool1_[ie][2];
+			int i4 = nbool1_[ie][3];
+
+			elem_[ie].setX(x(i1) + x(i2) + x(i3) + x(i4) / 4);//要素重心のx座標
+			elem_[ie].setY(y(i1) + y(i2) + y(i3) + y(i4) / 4);//要素重心のy座標
+			double S;//要素面積
+			S = area(i1, i2, i3, i4);//算出
+			elem_[ie].setSe(S);
+
+		}
+	}
+
+	//境界条件フラグの設定
+	//境界条件フラグの設定
+	//ncond:  0:内部,	1:剛体壁面(流入流出なし),
+			//2:流入壁面(dirichlet)　3:流出壁面(neumann)
+			//4:移動壁面条件(壁面接線方向に流速固定値1),5:滑りなし壁面条件(壁面において(u,v)=(0,0))
+			//6:滑りあり壁面条件(dvx/dy=0,vy=0)
+
+	for (int j = 0; j < ynode_; j++) {
+		for (int i = 0; i < xnode_; i++) {
+			int np = i + xnode_ * j;
+			ncond_[np] = 0;
+
+		}
+	}
+
+
+	for (int j = 0; j < ynode_; j++) {
+		for (int i = 0; i < xnode_; i++) {
+			int np = i + xnode_ * j;
+			if (i == 0) {//左壁面
+				if (j != 0 || j != ynode_ - 1) {//角をのぞく
+					ncond_[np] = Bcond_.getBCflagL();
+				}
+			}
+			if (j == 0) {//下壁面
+				ncond_[np] = Bcond_.getBCflagD();
+				if (i == 0) {//左下角
+					ncond_[np] = Bcond_.getBCflagL();
+				}
+				if (i == xnode_ - 1) {//右下角
+					ncond_[np] = Bcond_.getBCflagR();
+				}
+
+			}
+			if (i == xnode_ - 1) {//右壁面
+				if (j != 0 || j != ynode_ - 1) {//角をのぞく
+					ncond_[np] = Bcond_.getBCflagR();
+				}
+			}
+			if (j == ynode_ - 1) {//上壁面
+				ncond_[np] = Bcond_.getBCflagU();
+				if (i == 0) {//左上角
+					ncond_[np] = Bcond_.getBCflagL();
+				}
+				if (i == xnode_ - 1) {//右上角
+					ncond_[np] = Bcond_.getBCflagR();
+				}
+			}
+
+		}
+	}
+	for (int j = 0; j < ynode_; j++) {
+		for (int i = 0; i < xnode_; i++) {
+			int np = i + xnode_ * j;
+			if (x(np) <= (hx + xb_) && y(np) <= (hy + yb_)) {
+				//段差の部分を探る
+				ncond_[np] = 1;//剛体内部
+				if (x(np + 1) > (hx + xb_)) {
+					ncond_[np] = Bcond_.getBCflagC();//物体壁面
+				}
+				if (y(np + xnode_) > (hy + yb_)) {
+					ncond_[np] = Bcond_.getBCflagC();//物体壁面
+				}
+			}
+		}
+	}
+	for (int ie = 0; ie < nelem_; ie++) {
+		scond_[ie] = 0;
+	}
+	for (int ie = 0; ie < nelem_; ie++) {
+		int i1 = nbool1_[ie][0];
+		int i2 = nbool1_[ie][1];
+		int i3 = nbool1_[ie][2];
+		int i4 = nbool1_[ie][3];
+
+		if (ncond(i1) == 1 || ncond(i2) == 1 || ncond(i3) == 1 || ncond(i4) == 1) {
+			//要素内の点に剛体内部のフラグ(1)が立つ
+			scond_[ie] = 1;
+		}
+		if (ncond(i1) != 0 && ncond(i2) != 0 && ncond(i3) != 0 && ncond(i4) != 0) {
+			//要素内のすべての点が壁面のフラグ
+			scond_[ie] = 1;
+		}
+
+	}
+}
