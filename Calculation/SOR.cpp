@@ -130,13 +130,12 @@ SORparam::SORparam(Mesh2d& Mesh)
 			if (nflagl == 1) {
 				A[3] = A[1];
 			}
-			cout << ie << endl;
-
-			cout << "A0=" << A[0] << " A1=" << A[1] << " A2=" << A[2] << " A3=" << A[3] << endl;
-			cout << "sd=" << sd << " sr=" << sr << " su=" << su << " sl=" << sl << endl;
-			cout << "Sd=" << Sd << " Sr=" << Sr << " Su=" << Su << " Sl=" << Sl << endl;
+			//cout << ie << endl;
+			//cout << "A0=" << A[0] << " A1=" << A[1] << " A2=" << A[2] << " A3=" << A[3] << endl;
+			//cout << "sd=" << sd << " sr=" << sr << " su=" << su << " sl=" << sl << endl;
+			//cout << "Sd=" << Sd << " Sr=" << Sr << " Su=" << Su << " Sl=" << Sl << endl;
 			lambda[ie] = (A[0] + A[1] + A[2] + A[3]) / mesh.Se(ie);
-			cout << "lambda[" << ie << "]=" << lambda[ie] << endl;
+			//cout << "lambda[" << ie << "]=" << lambda[ie] << endl;
 
 		}
 		else {

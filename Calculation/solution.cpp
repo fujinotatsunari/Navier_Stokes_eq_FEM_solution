@@ -333,6 +333,7 @@ void SOR::do_calculation(Velocity2d& v, Pressure& p, Time& T, Mesh2d& Mesh, SORp
 	}
 	*/
 	
+	
 	Utilde.resize(Mesh.nnode());//予測子ステップの値
 	for (int i = 0; i < Mesh.nnode(); i++) {
 		Utilde[i] = v[i];//予測子ステップの値の代入
@@ -350,21 +351,19 @@ void SOR::do_calculation(Velocity2d& v, Pressure& p, Time& T, Mesh2d& Mesh, SORp
 	div_max = 0.0;//発散量最大値(絶対値)(これがepsより小さくなったらループを突破)
 
 	do{
-		
-
 		//step2
-
 		for (int ie = 0; ie < Mesh.nelem(); ie++) {
 			int i1 = Mesh.i1(ie);
 			int i2 = Mesh.i2(ie);
 			int i3 = Mesh.i3(ie);
 			int i4 = Mesh.i4(ie);
+
 			if (Mesh.scond(ie) != 1) {//非障害物領域
 				phi[ie] = -div[ie] / param.get_lambda(ie);//速度修正ポテンシャルの更新
-				cout << "lamda[" << ie << "]=" << param.get_lambda(ie) << endl;
-				cout << "phi[" << ie << "]=" << phi[ie].v() << endl;
+				//cout << "lamda[" << ie << "]=" << param.get_lambda(ie) << endl;
+				//cout << "phi[" << ie << "]=" << phi[ie][0] << endl;
 				p[ie] = p[ie] + phi[ie] / T.dt();//圧力の更新
-				cout << "p[" << ie << "]=" << p[ie].v() << endl;
+				//cout << "p[" << ie << "]=" << p[ie][0] << endl;
 			}
 			else {//障害物領域
 				phi[ie] = 0.0;
@@ -490,10 +489,9 @@ void HSMAC_FEM::do_solution() {
 		max_div = S.max_div();
 
 		
-		
+		auto step_end = std::chrono::high_resolution_clock::now();    // 1step終了時刻を取得
 		if (n % t.nsample() == 0) {//ステップ数が出力ステップ数のとき
 			view_parameters(n);//計算パラメータの表示
-			auto step_end = std::chrono::high_resolution_clock::now();    // 1step終了時刻を取得
 			auto step_duration = std::chrono::duration_cast<std::chrono::seconds>(step_end - step_start);  // 1step計算時間を秒に変換
 			auto step_duration_sum = std::chrono::duration_cast<std::chrono::seconds>(step_end - start);  // 累計計算時間を秒に変換
 			cout << "Step No." << n << " :calculation time : " << step_duration.count() << " s" << endl;
@@ -503,10 +501,10 @@ void HSMAC_FEM::do_solution() {
 			if (output.get_model() == "cavity") {
 				output.output_ghia(n);
 			}
-
+			cout << "\n";
+			cout << "\n";
 		}
-		cout << "\n";
-		cout << "\n";
+		
 
 	}
 	cout << "Calculation End!" << endl;

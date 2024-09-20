@@ -214,8 +214,8 @@ void Mesh2d::geninputmesh() {
 		double S;
 		S = area(i1, i2, i3, i4);
 		elem_[ie].setSe(S);
-		cout << "S[" << ie << "]=" << S << endl;
-		cout << "EX[" << ie << "]=" << EX[ie] << "EY[" << ie << "]=" << EY[ie] << endl;
+		//cout << "S[" << ie << "]=" << S << endl;
+		//cout << "EX[" << ie << "]=" << EX[ie] << "EY[" << ie << "]=" << EY[ie] << endl;
 	}
 
 	/*
@@ -363,37 +363,37 @@ double Mesh2d::area(int E1, int E2) {
 	int e14 = nbool3(E1, 3);//E1の左の要素番号
 	//要素重心の座標
 	double x1 = eX(E1);
-	double x2 = eX(E2);
+	double x3 = eX(E2);
 	double y1 = eY(E1);
-	double y2 = eY(E2);
+	double y3 = eY(E2);
 
-	double x3, x4, y3, y4;//辺の両端の座標
-	int n1, n2;//辺の両端の節点番号
+	double x2, x4, y2, y4;//辺の両端の座標
+	int n2, n4;//辺の両端の節点番号
 	if (e11 == E2) {//E2はE1の下側
-		n1 = nbool1(E1, 0);//要素左下の点
-		n2 = nbool1(E1, 1);//要素右下の点
+		n2 = nbool1(E1, 0);//要素左下の点
+		n4 = nbool1(E1, 1);//要素右下の点
 	}
 	else if (e12 == E2) {//E2はE1の右側
-		n1 = nbool1(E1, 1);//要素右下の点
-		n2 = nbool1(E1, 2);//要素右上の点
+		n2 = nbool1(E1, 1);//要素右下の点
+		n4 = nbool1(E1, 2);//要素右上の点
 	}
 	else if (e13 == E2) {//E2はE1の上側
-		n1 = nbool1(E1, 2);//要素右上の点
-		n2 = nbool1(E1, 3);//要素左上の点
+		n2 = nbool1(E1, 2);//要素右上の点
+		n4 = nbool1(E1, 3);//要素左上の点
 	}
 	else if (e14 == E2) {//E2はE1の左側
-		n1 = nbool1(E1, 3);//要素左上の点
-		n2 = nbool1(E1, 0);//要素左下の点
+		n2 = nbool1(E1, 3);//要素左上の点
+		n4 = nbool1(E1, 0);//要素左下の点
 	}
 	else {
 		cout << "E2はE1に隣接してません" << endl;
 		exit(-1);
 	}
 	//辺両端の座標
-	x3 = x(n1);
-	y3 = y(n1);
-	x4 = x(n2);
-	y4 = y(n2);
+	x2 = x(n2);
+	y2 = y(n2);
+	x4 = x(n4);
+	y4 = y(n4);
 	
 	double area;
 	area = ((x3 - x1) * (y4 - y2) - (x4 - x2) * (y3 - y1)) / 2;//要素四角形の面積を求める

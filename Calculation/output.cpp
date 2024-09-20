@@ -209,11 +209,14 @@ void OutputData::output_ghia(int N) {
 		outputfile1 << ghiax[i] << "," << ghiav[i] << "," << "\n";
 	}
 	outputfile1.close();
+	ghiax.clear();
+	ghiav.clear();
 	for (int j = 0; j < ghiau.size(); j++) {
 		outputfile2 << ghiay[j] << "," << ghiau[j] << "," << "\n";
 	}
 	outputfile2.close();
-
+	ghiay.clear();
+	ghiau.clear();
 }
 
 void OutputData::output_condition() {
