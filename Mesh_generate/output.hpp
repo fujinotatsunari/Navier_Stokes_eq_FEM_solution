@@ -15,13 +15,13 @@ protected:
 	//0:未作成,1:作成済み
 	//vector<double> x;
 	//vector<double> y;
-	vector<vector<double>> nodecopy;//Ux,Uy,BCのcsv用の配列
-	vector<vector<double>> elemcopy;//Pのcsv用の配列
+
 	Mesh2d& mesh;
 	Velocity2d& V;
 	Pressure& P;
 	Boundarycond& BC;
 	string dir;//ディレクトリdata_nの位置
+	string model;
 public:
 	OutputData(Mesh2d& Mesh, Boundarycond& Bc, Velocity2d& v, Pressure& p);
 	void set_scheme(int Scheme);
@@ -30,7 +30,7 @@ public:
 	int get_Filestage();
 	string get_dir();
 
-	virtual string directory_setup();//下におけるdata_nを返す
+	string directory_setup();//下におけるdata_nを返す
 	/*
 	* C:-//--|result|----|data0|-----|cond|
 	*           |            |
@@ -38,10 +38,11 @@ public:
 	*           |-------|data1|
 	*           |-------|data2|
 	*/
-	virtual void output_time_csv(int N);//Nステップでのcsvの出力
-	virtual void output_csv();//csvの出力
-	virtual void output_dat();//datの出力
-	virtual void output_condition();//パラメータファイルの出力
+   
+	void output_csv();//csvの出力
+	void output_dat();//datの出力
+	void output_condition();//パラメータファイルの出力
+	void set_modelname(string name);
 	//出力の仕様変更
 	//原則１ファイルが1個の多次元(あるいは1次元)配列に対応するようにする
 	// ncond.csv scond.csv U.csv V.csv P.csv 　<=　1次元配列
@@ -50,27 +51,6 @@ public:
 	// param.csv <=空間パラメータと境界条件の保存 あとモデル
 	//void data_update();//データの更新
 	
-};
-
-class Outputcavitymesh :public OutputData {
-private:
-	string dir1 = "cavity";
-public:
-	Outputcavitymesh(Mesh2d& Mesh, Boundarycond& Bc, Velocity2d& v, Pressure& p);
-	string directory_setup() override;
-	void output_csv() override;
-	//void output_dat() override;
-	void output_condition() override;
-};
-class Outputbackstepmesh :public OutputData {
-private:
-	string dir1 = "backstep";
-public:
-	Outputbackstepmesh(Mesh2d& Mesh, Boundarycond& Bc, Velocity2d& v, Pressure& p);
-	string directory_setup() override;
-	void output_csv() override;
-	//void output_dat() override;
-	void output_condition() override;
 };
 
 

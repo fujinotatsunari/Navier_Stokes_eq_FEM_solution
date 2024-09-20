@@ -54,39 +54,7 @@ void Element2d::setSe(double Se_) {
 double Element2d::getSe() {
 	return Se;
 }
-/*
-Time::Time(TimeP& Tp) :ntime_(0), dt_(0), nend_(0), nsample_(0), tparam(Tp) {
-	setup();
-}
-void Time::setup() {
-	dt_ = tparam.getDt();
-	nend_ = tparam.getNend();
-	nsample_ = tparam.getNsample();
-	t.resize(nend_ + 1, 0);
-	for (int n = 0; n < t.size(); n++) {
-		t[n] = 0.0 + (double)n * dt_;
-	}
-}
-double Time::ntime(int n) {
-	ntime_ = 0.0 + (double)n * dt_;
-	return ntime_;
-}
-double Time::dt() {
-	return dt_;
-}
-int Time::nend() {
-	return nend_;
-}
-int Time::nsample() {
-	return nsample_;
-}
-double const& Time::operator[](int n)const {
-	return t[n];
-}
-double& Time::operator[](int n) {
-	return t[n];
-}
-*/
+
 Mesh2d::Mesh2d(NodeP& NP, Boundarycond& BC)
 	:nparam_(NP), Bcond_(BC), Lx_(0), Ly_(0), xb_(0), xt_(0), yb_(0), yt_(0), dx_(0), dy_(0), xnode_(0), ynode_(0), xelem_(0), yelem_(0), nnode_(0), nelem_(0)
 {
@@ -386,51 +354,45 @@ double Mesh2d::area(int E1, int E2) {
 	int e14 = nbool3(E1, 3);//E1の左の要素番号
 	//要素重心の座標
 	double x1 = eX(E1);
-	double x2 = eX(E2);
+	double x3 = eX(E2);
 	double y1 = eY(E1);
-	double y2 = eY(E2);
+	double y3 = eY(E2);
 
-	double x3, x4, y3, y4;//辺の両端の座標
-	int n1, n2;//辺の両端の節点番号
+	double x2, x4, y2, y4;//辺の両端の座標
+	int n2, n4;//辺の両端の節点番号
 	if (e11 == E2) {//E2はE1の下側
-		n1 = nbool1(E1, 0);//要素左下の点
-		n2 = nbool1(E1, 1);//要素右下の点
+		n2 = nbool1(E1, 0);//要素左下の点
+		n4 = nbool1(E1, 1);//要素右下の点
 	}
 	else if (e12 == E2) {//E2はE1の右側
-		n1 = nbool1(E1, 1);//要素右下の点
-		n2 = nbool1(E1, 2);//要素右上の点
+		n2 = nbool1(E1, 1);//要素右下の点
+		n4 = nbool1(E1, 2);//要素右上の点
 	}
 	else if (e13 == E2) {//E2はE1の上側
-		n1 = nbool1(E1, 2);//要素右上の点
-		n2 = nbool1(E1, 3);//要素左上の点
+		n2 = nbool1(E1, 2);//要素右上の点
+		n4 = nbool1(E1, 3);//要素左上の点
 	}
 	else if (e14 == E2) {//E2はE1の左側
-		n1 = nbool1(E1, 3);//要素左上の点
-		n2 = nbool1(E1, 0);//要素左下の点
+		n2 = nbool1(E1, 3);//要素左上の点
+		n4 = nbool1(E1, 0);//要素左下の点
 	}
 	else {
 		cout << "E2はE1に隣接してません" << endl;
 		exit(-1);
 	}
 	//辺両端の座標
-	x3 = x(n1);
-	y3 = y(n1);
-	x4 = x(n2);
-	y4 = y(n2);
-	Scalar2d S;
-	//位置ベクトル
-	Vector2d V1(x1, y1);
-	Vector2d V2(x2, y2);
-	Vector2d V3(x3, y3);
-	Vector2d V4(x4, y4);
+	x2 = x(n2);
+	y2 = y(n2);
+	x4 = x(n4);
+	y4 = y(n4);
 
-	S = 0.5 * ((V3 - V1) % (V4 - V2));
-	return S.v();
+	double area;
+	area = ((x3 - x1) * (y4 - y2) - (x4 - x2) * (y3 - y1)) / 2;//要素四角形の面積を求める
+	return area;
 
 }
 double Mesh2d::area(int n1, int n2, int n3, int n4) {
 
-	Scalar2d S;
 	double x1 = x(n1);
 	double x2 = x(n2);
 	double x3 = x(n3);
@@ -440,13 +402,9 @@ double Mesh2d::area(int n1, int n2, int n3, int n4) {
 	double y3 = y(n3);
 	double y4 = y(n4);
 	//位置ベクトル
-	Vector2d V1(x1, y1);
-	Vector2d V2(x2, y2);
-	Vector2d V3(x3, y3);
-	Vector2d V4(x4, y4);
-
-	S = 0.5 * ((V3 - V1) % (V4 - V2));
-	return S.v();
+	double area;
+	area = ((x3 - x1) * (y4 - y2) - (x4 - x2) * (y3 - y1)) / 2;//要素四角形の面積を求める
+	return area;
 
 }
 CavityMesh2d::CavityMesh2d(NodeP& NP, Boundarycond& BC)
@@ -694,6 +652,7 @@ void BackstepMesh2d::generate() {
 			
 		}
 	}
+
 	for (int j = 0; j < ynode_; j++) {
 		for (int i = 0; i < xnode_; i++) {
 			int np = i + xnode_ * j;
@@ -709,6 +668,7 @@ void BackstepMesh2d::generate() {
 			}
 		}
 	}
+
 	for (int ie = 0; ie < nelem_; ie++) {
 		scond_[ie] = 0;
 	}
@@ -856,21 +816,30 @@ void SquarePillarMesh2d::generate() {
 
 		}
 	}
+	
 	for (int j = 0; j < ynode_; j++) {
 		for (int i = 0; i < xnode_; i++) {
 			int np = i + xnode_ * j;
-			if (x(np) <= (hx + xb_) && y(np) <= (hy + yb_)) {
-				//段差の部分を探る
-				ncond_[np] = 1;//剛体内部
-				if (x(np + 1) > (hx + xb_)) {
-					ncond_[np] = Bcond_.getBCflagC();//物体壁面
-				}
-				if (y(np + xnode_) > (hy + yb_)) {
-					ncond_[np] = Bcond_.getBCflagC();//物体壁面
+			if (i != 0 || i != xnode_ - 1) {
+				if (j != 0 || j != ynode_ - 1) {
+					if (((x(np) >= (ox - hx)) && (y(np) >= (oy - hy)))
+						|| ((x(np) >= (ox - hx)) && (y(np) <= (oy + hy)))
+						|| ((x(np) <= (ox + hx)) && (y(np) >= (oy - hy)))
+						|| ((x(np) <= (ox + hx)) && (y(np) <= (oy + hy)))) {
+						//角柱と判定する
+						ncond_[np] = 1;//剛体内部
+
+						if (x(np - 1) < ox - hx || x(np + 1) > ox + hx || y(np - xnode_) < oy - hy || y(np + xnode_) > oy + hy) {
+							//剛体表面
+							ncond_[np] = Bcond_.getBCflagC();
+						}
+					}
 				}
 			}
+			
 		}
 	}
+
 	for (int ie = 0; ie < nelem_; ie++) {
 		scond_[ie] = 0;
 	}
@@ -890,4 +859,6 @@ void SquarePillarMesh2d::generate() {
 		}
 
 	}
+
+
 }

@@ -202,6 +202,9 @@ void Pressure::cavity_init() {
 void Pressure::backstep_init() {
 	init();
 }
+void Pressure::Pillar_init() {
+	init();
+}
 
 Velocity2d::Velocity2d(Mesh2d& Mesh, Boundarycond& BC) 
 	:VectorField2d(Mesh, BC), nnode(Mesh.nnode())
@@ -241,87 +244,17 @@ void Velocity2d::backstep_init() {
 			}
 		}
 	}
-	
-
 }
-
-/*
-PHI::PHI(Mesh2d& mesh, Boundarycond& BC)
-	:ScalarField2d(mesh, BC)
-{
-	setup();
-}
-void PHI::setup() {
-	scalar_.resize(mesh_.nnode());
-	value.resize(mesh_.nnode());
-	for (int i = 0; i < scalar_.size(); i++) {
-		scalar_[i].setNo(i);
-		scalar_[i].setX(mesh_.x(i));
-		scalar_[i].setY(mesh_.y(i));
-		scalar_[i].setV(0.0);
-		value[i] = scalar_[i].getV();
-	}
-}
-void PHI::initialize_default() {
-	//初期条件の設定
-	for (int j = 0; j < mesh_.ynode(); j++) {
-		for (int i = 0; i < mesh_.xnode(); i++) {
-			int np = i + mesh_.xnode() * j;
-
-			if (i == 0) {//左端
-				value[np] = Bcond_.getdL();;
-				scalar_[np].setV(value[np]);
-			}
-			else if (j == 0) {//下端
-				value[np] = Bcond_.getdD();
-				scalar_[np].setV(value[np]);
-			}
-			else {
-				value[np] = 0.0;
-				scalar_[np].setV(value[np]);
-			}
-			//cout << "value[" << np << "]=" << value[np] << endl;
-		}
-	}
-	//境界条件の設定
-	for (int j = 0; j < mesh_.ynode(); j++) {
-		for (int i = 0; i < mesh_.xnode(); i++) {
-			int np = i + mesh_.xnode() * j;
-			if (mesh_.ncond(np) == 1) {//dirichlet境界条件
-				if (i == 0) {//左壁面
-					value[np] = Bcond_.getdL();
-					scalar_[np].setV(value[np]);
-				}
-				if (j == 0) {//下壁面
-					value[np] = Bcond_.getdD();
-					scalar_[np].setV(value[np]);
-				}
-				if (i == mesh_.xnode() - 1) {//右壁面
-					//value[np] = Bcond_.getdR();
-					//scalar_[np].setV(value[np]);
-				}
-				if (j == mesh_.ynode() - 1) {//上壁面
-					//value[np] = Bcond_.getdU();
-					//scalar_[np].setV(value[np]);
-				}
-
-			}
-		}
-	}
-	
-}
-PHI::PHI(Mesh2d& Mesh, Boundarycond& BC)
-	:ScalarField2d(Mesh, BC),nnode(Mesh.nnode())
-{
-	scalar.resize(nnode);
-}
-void PHI::init() {
+void Velocity2d::Pillar_init() {
+	init();
+	Vector2d V(1.0, 0.0);
 	for (int j = 0; j < mesh.ynode(); j++) {
 		for (int i = 0; i < mesh.xnode(); i++) {
 			int np = i + mesh.xnode() * j;
-			scalar[np][0] = 0.0;
-
+			if (mesh.ncond(np) == 2) {//2:流入壁面(壁面法線方向に流速固定値1)
+				vector[np] = V;
+			}
 		}
 	}
 }
-*/
+

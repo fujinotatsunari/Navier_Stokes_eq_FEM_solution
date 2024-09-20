@@ -86,21 +86,9 @@ public:
 	void init();//初期化
 	void cavity_init();//キャビティ流れの初期化(圧力編)
 	void backstep_init();//バックステップ流れの初期化
+	void Pillar_init();
 };
-/*
-class PHI :public ScalarField2d {//移流拡散方程式の物理量phi
-private:
-	int nnode;//va配列の大きさnnodeに対応
-public:
-	PHI(Mesh2d& mesh, Boundarycond& BC);
-	void init();
-	
-	//void initialize_default();//左端と下端に1を与える
-	//void initialize_deltafunc();//デルタ関数型の初期条件(
-	//void initialize_cosfunc();//cos関数型の初期条件
 
-};
-*/
 class Velocity2d :public VectorField2d {
 private:
 	int nnode;
@@ -109,6 +97,7 @@ public:
 	void init();//初期化
 	void cavity_init();//キャビティ流れの初期化(流速編)
 	void backstep_init();//バックステップ流れの初期化
+	void Pillar_init();
 };
 
 

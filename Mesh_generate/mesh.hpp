@@ -38,28 +38,7 @@ public:
 	double getSe();
 };
 
-/*
-class Time {//時間軸
-private:
-	double ntime_;//nステップでの時刻
-	double dt_;//時間刻み幅
-	int nend_;//終了ステップ
-	int nsample_;//サンプルステップ
-	vector<double> t;
-	TimeP& tparam;
-public:
-	Time(TimeP& TP);
-	//ゲッタ
-	double ntime(int n);
-	void setup();
-	double dt();
-	int nend();
-	int nsample();
-	double const& operator[](int n)const;
-	double& operator[](int n);
 
-};
-*/
 class Mesh2d {//計算格子
 	//1: 配列を与えるのではなく, 入力のインデックスに対応する配列の中身を与えるようにする
 	//2:このクラスの役割は計算する空間を定義し, その空間上で物理量の計算を走らせるための諸変数の提供である

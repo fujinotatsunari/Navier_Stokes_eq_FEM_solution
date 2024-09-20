@@ -114,44 +114,8 @@ int NodeP::getNnode() {
 int NodeP::getNelem() {
 	return nelem;
 }
-/*
-TimeP::TimeP()
-	:dt(0), nend(0), nsample(0) 
-{
-	//cout << "TimeP()" << endl;
-	setTparam();
-}
-TimeP::TimeP(const TimeP& Tp) {
-	dt = Tp.dt;
-	nend = Tp.nend;
-	nsample = Tp.nsample;
-}
-TimeP& TimeP::operator=(const TimeP& Tp) {
-	dt = Tp.dt;
-	nend = Tp.nend;
-	nsample = Tp.nsample;
 
-	return *this;
-}
-void TimeP::setTparam() {
-	cout << "dt->";
-	cin >> dt;
-	cout << "終了ステップ->";
-	cin >> nend;
-	cout << "サンプルステップ数: nsample->";
-	cin >> nsample;
 
-}
-double TimeP::getDt() {
-	return dt;
-}
-int TimeP::getNend() {
-	return nend;
-}
-int TimeP::getNsample () {
-	return nsample;
-}
-*/
 Boundarycond::Boundarycond()
 	:flagL(0), flagR(0), flagU(0), flagD(0),flagC(0)
 {
@@ -187,9 +151,27 @@ void Boundarycond::set_cavityBC() {
 	flagR = 5;
 	cout << "下壁面の境界条件->" << 5 << endl;
 	flagD = 5;
+	flagC = -1;
 }
 void Boundarycond::set_cylinderBC() {
 	cout << "円柱周り流れの境界条件の設定" << endl;
+
+	cout << "2:流入境界条件(diriclet)  3:流出境界条件(neumann)" << endl;
+	cout << "4:移動壁面条件  5:滑りなし壁面条件　6:滑りあり壁面条件" << endl;
+
+	cout << "上壁面の境界条件->(5or6)";
+	cin >> flagU;
+	cout << "左壁面の境界条件->" << 2 << endl;
+	flagL = 2;
+	cout << "右壁面の境界条件->" << 3 << endl;
+	flagR = 3;
+	cout << "下壁面の境界条件->(5or6)";
+	cin >> flagD;
+	cout << "円柱壁面の境界条件->(5or6)";
+	cin >> flagC;
+}
+void Boundarycond::set_pillarBC() {
+	cout << "角柱周り流れの境界条件の設定" << endl;
 
 	cout << "2:流入境界条件(diriclet)  3:流出境界条件(neumann)" << endl;
 	cout << "4:移動壁面条件  5:滑りなし壁面条件　6:滑りあり壁面条件" << endl;
