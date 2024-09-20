@@ -8,7 +8,7 @@ using namespace std;
 NodeP::NodeP()
 	:Lx(0), Ly(0), xb(0), xt(0), yb(0), yt(0), dx(0), dy(0), xnode(0), ynode(0), xelem(0), yelem(0), nnode(0), nelem(0)
 {
-	
+	cout << "Object generate: Node Prameter " << endl;
 	//setNodeParam();
 }
 NodeP::NodeP(const NodeP& Np) {
@@ -160,6 +160,7 @@ void NodeP::setNelem(int Nelem) {
 TimeP::TimeP()
 	:dt(0), nend(0), nsample(0) 
 {
+	cout << "Object generate: Time parameter " << endl;
 	//cout << "TimeP()" << endl;
 	setTparam();
 }
@@ -176,7 +177,9 @@ TimeP& TimeP::operator=(const TimeP& Tp) {
 	return *this;
 }
 void TimeP::setTparam() {
-	cout << "dt->";
+
+	cout << "時間パラメータの入力" << endl;
+	cout << "時間刻み幅: dt->";
 	cin >> dt;
 	cout << "終了ステップ->";
 	cin >> nend;
@@ -197,7 +200,7 @@ int TimeP::getNsample () {
 Boundarycond::Boundarycond()
 	:flagL(0), flagR(0), flagU(0), flagD(0),flagC(0)
 {
-	
+	cout << "Object generate: Boundary condtion" << endl;
 }
 void Boundarycond::set_userBC() {
 	cout << "境界条件の設定" << endl;
@@ -295,6 +298,9 @@ void Boundarycond::setBCflagC(int flag) {
 	flagC = flag;
 }
 NDNSparam::NDNSparam() {
+	cout << "Object generate: None dimention Navier-Stokes parameter" << endl;
+
+	cout << "無次元化Navier-Stokes方程式パラメータ" << endl;
 	cout << "レイノルズ数 Re->";
 	cin >> Re;
 }
@@ -304,49 +310,3 @@ double NDNSparam::get_Re() {
 void NDNSparam::set_Re(double re){
 	Re = re;
 }
-/*
-ADeq_param_2d::ADeq_param_2d(NodeP& Np, TimeP& Tp)
-	:nparam(Np),tparam(Tp)
-{
-
-
-	set_param();
-}
-void ADeq_param_2d::set_param() {
-	cout << "x方向定常流速cx->";
-	cin >> cx;
-	cout << "y方向定常流速cy->";
-	cin >> cy;
-	cout << "拡散係数　alpha->";
-	cin >> alpha;
-	courantx = cx * tparam.getDt() / nparam.getDx();
-	couranty = cy * tparam.getDt() / nparam.getDy();
-	diffusion = alpha * tparam.getDt() / (nparam.getDx() * nparam.getDy());
-	cout << "x方向 courant数 Cx=" << courantx << endl;
-	cout << "y方向 courant数 Cy=" << couranty << endl;
-	cout << "拡散数 D=" << diffusion << endl;
-	Pe = sqrt(cx * cx + cy * cy) * sqrt(nparam.getLx() * nparam.getLx() + nparam.getLy() * nparam.getLy()) / alpha;
-	cout << "Peclet数 Pe=" << Pe << endl;
-
-}
-double ADeq_param_2d::get_alpha() {
-	return alpha;
-}
-double ADeq_param_2d::get_cx() {
-	return cx;
-}
-double ADeq_param_2d::get_cy() {
-	return cy;
-}
-double ADeq_param_2d::get_couranx() {
-	return courantx;
-}
-double ADeq_param_2d::get_courany() {
-	return couranty;
-}
-double ADeq_param_2d::get_diffusion() {
-	return diffusion;
-}
-double ADeq_param_2d::get_Pe() {
-	return Pe;
-}*/

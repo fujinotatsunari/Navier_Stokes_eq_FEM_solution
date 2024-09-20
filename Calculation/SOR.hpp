@@ -9,8 +9,8 @@ using namespace std;
 class SORparam {//同時緩和法のパラメータ
 private:
 	Mesh2d& mesh;
-	int nmax = 500;//同時緩和法最大反復回数
-	double eps = 1.0e-5;//同時緩和法収束判定値
+	int nmax;//同時緩和法最大反復回数
+	double eps;//同時緩和法収束判定値
 	vector<double> lambda;//速度修正ポテンシャル係数
 	
 

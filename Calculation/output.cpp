@@ -32,13 +32,10 @@ string make_directories(string str1, string str2) {
 }
 
 
-
 OutputData::OutputData(Mesh2d& Mesh, Time& T, Boundarycond& Bc, Velocity2d& v, Pressure& p, NDNSparam& Param)
 	:mesh(Mesh),t(T), BC(Bc),V(v),P(p), Filestage(0),param(Param)
 {
-	meshpath = nullptr;
-	model = nullptr;
-	scheme = nullptr;
+
 }
 void OutputData::set_Filestage(int filestage) {
 	Filestage = filestage;

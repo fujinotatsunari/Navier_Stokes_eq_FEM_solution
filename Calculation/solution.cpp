@@ -15,6 +15,7 @@ using namespace std;
 Divergence::Divergence(Mesh2d& Mesh,Boundarycond& BC)//発散量
 	:ScalarField2d(Mesh, BC),size(Mesh.nelem())
 {
+
 	//発散量コンストラクタ
 	scalar.resize(size);
 }
@@ -28,6 +29,7 @@ void Divergence::cal_divergence(Velocity2d& v) {//発散量の計算
 		int i3 = mesh.i3(ie);
 		int i4 = mesh.i4(ie);
 		double S = mesh.Se(ie);
+		//cout << "area[" << ie << "]=" << S << endl;
 		if (mesh.scond(ie) != 1) {//非障害物領域
 			scalar[ie] = (C[ie][0][0] * v[i1][0] + C[ie][0][1] * v[i1][1]
 						+ C[ie][1][0] * v[i2][0] + C[ie][1][1] * v[i2][1]
@@ -37,7 +39,7 @@ void Divergence::cal_divergence(Velocity2d& v) {//発散量の計算
 		else {//障害物内部
 			scalar[ie] = 0.0;
 		}
-
+		//cout << "Div[" << ie << "]=" << scalar[ie].v() << endl;
 	}
 }
 void Divergence::cal_divergence(vector<Vector2d>& v) {//発散量の計算
@@ -55,21 +57,25 @@ void Divergence::cal_divergence(vector<Vector2d>& v) {//発散量の計算
 						+ C[ie][1][0] * v[i2][0] + C[ie][1][1] * v[i2][1]
 						+ C[ie][2][0] * v[i3][0] + C[ie][2][1] * v[i3][1]
 						+ C[ie][3][0] * v[i4][0] + C[ie][3][1] * v[i4][1]) / S;
+		
 		}
 		else {//障害物内部
 			scalar[ie] = 0.0;
 		}
+		//cout << "Div[" << ie << "]=" << scalar[ie].v() << endl;
 		
 
 	}
 }
 double Divergence::max_div() {//発散量の絶対値の最大値を調べる
 	double max = fabs(scalar[0].v());
+
 	for (int i = 0; i < scalar.size(); i++) {
 		if (max < fabs(scalar[i].v())) {
 			max = fabs(scalar[i].v());
 		}
 	}
+	//cout << max << endl;
 	return max;
 }
 VMPotential::VMPotential(Mesh2d& Mesh, Boundarycond& bc)//速度修正ポテンシャル
@@ -93,6 +99,7 @@ void VMPotential::cal_VMP(Divergence& D, SORparam& param) {//速度修正ポテ�
 Predictor::Predictor()
 {
 	//予測子コンストラクタ
+	cout << "object generate: Predictor" << endl;
 }
 void Predictor::euler_explicit(Velocity2d& v, Pressure& p, Time& T, Mesh2d& Mesh, NDNSparam& Param) {
 	//オイラー前進法による予測子計算
@@ -167,6 +174,7 @@ void Predictor::euler_explicit(Velocity2d& v, Pressure& p, Time& T, Mesh2d& Mesh
 
 	for (int i = 0; i < Mesh.nnode(); i++) {
 		UB[i] = v[i];//前ステップの値の保存
+
 	}
 	//速度場の計算
 	for (int j = 0; j < node; j++) {
@@ -195,6 +203,9 @@ void Predictor::euler_explicit(Velocity2d& v, Pressure& p, Time& T, Mesh2d& Mesh
 				Vector2d c(0.0, 0.0);
 				UU[np] += c;
 			}
+
+			//cout << "UU[" << np << "][0]=" << UU[np][0] << endl;
+			//cout << "UU[" << np << "][1]=" << UU[np][1] << endl;
 		}
 	}
 	//予測子の計算
@@ -243,13 +254,15 @@ void Predictor::euler_explicit(Velocity2d& v, Pressure& p, Time& T, Mesh2d& Mesh
 			}
 		}
 		UU[i] = c;
+		//cout << "v[" << i << "][0]=" << v[i][0] << endl;
+		//cout << "v[" << i << "][1]=" << v[i][1] << endl;
 	}
 }
 
 SOR::SOR(SORparam& Param)//速度圧力同時緩和法による修正クラス
-	:sparam(Param), nor (0)
+	:sparam(Param), nor (0),div_max(0.0)
 {
-
+	cout << "object generate: SOR" << endl;
 }
 void SOR::do_calculation(Velocity2d& v, Pressure& p, Time& T, Mesh2d& Mesh, SORparam& param, Boundarycond& BC) {
 	Lumped_Massmatrix Fm(Mesh);//集中化質量行列
@@ -314,6 +327,11 @@ void SOR::do_calculation(Velocity2d& v, Pressure& p, Time& T, Mesh2d& Mesh, SORp
 	Divergence div(Mesh, BC);
 	VMPotential phi(Mesh, BC);
 	div.cal_divergence(v);
+	/*
+	for (int i = 0; i < Mesh.nelem(); i++) {
+		cout << "div[" << i << "]=" << div[i].v() << endl;
+	}
+	*/
 	
 	Utilde.resize(Mesh.nnode());//予測子ステップの値
 	for (int i = 0; i < Mesh.nnode(); i++) {
@@ -343,7 +361,10 @@ void SOR::do_calculation(Velocity2d& v, Pressure& p, Time& T, Mesh2d& Mesh, SORp
 			int i4 = Mesh.i4(ie);
 			if (Mesh.scond(ie) != 1) {//非障害物領域
 				phi[ie] = -div[ie] / param.get_lambda(ie);//速度修正ポテンシャルの更新
+				cout << "lamda[" << ie << "]=" << param.get_lambda(ie) << endl;
+				cout << "phi[" << ie << "]=" << phi[ie].v() << endl;
 				p[ie] = p[ie] + phi[ie] / T.dt();//圧力の更新
+				cout << "p[" << ie << "]=" << p[ie].v() << endl;
 			}
 			else {//障害物領域
 				phi[ie] = 0.0;
@@ -418,7 +439,7 @@ void SOR::do_calculation(Velocity2d& v, Pressure& p, Time& T, Mesh2d& Mesh, SORp
 		div_max = div.max_div();//発散量の最大値を計算
 
 		nor++;//反復回数の更新
-	} while ((div_max > param.get_eps()) && (nor < param.get_nmax()));
+	} while ((div_max > 1.0e-5) && (nor < 500));
 }
 int SOR::get_nor() {
 	return nor;
@@ -427,9 +448,9 @@ double SOR::max_div() {
 	return div_max;
 }
 HSMAC_FEM::HSMAC_FEM(Velocity2d& v, Pressure& p, Time& T, Mesh2d& Mesh, NDNSparam& NSP, SORparam& SRP, Boundarycond& bc, InputData& INPUT)
-	:V(v), P(p), t(T), mesh(Mesh), nsparam(NSP), sorparam(SRP), BC(bc),input(INPUT)
+	:V(v), P(p), t(T), mesh(Mesh), nsparam(NSP), sorparam(SRP), BC(bc), input(INPUT), NOR(0), max_div(0.0)
 {
-
+	cout << "object generate: HSMAC_FEM" << endl;
 }
 void HSMAC_FEM::do_solution() {
 	Predictor Vp;//流速予測子計算オブジェクト
@@ -448,6 +469,8 @@ void HSMAC_FEM::do_solution() {
 	cout << "Caluculatoin Start !" << endl;
 	auto start= std::chrono::high_resolution_clock::now();//総計算時間 開始時刻取得
 	cout << "Step No.0   Save Initial Result" << endl;
+	cout << "\n";
+	cout << "\n";
 
 	output.output_condition();//計算条件の出力
 	output.output_time_csv(0);//0ステップの出力
@@ -482,6 +505,9 @@ void HSMAC_FEM::do_solution() {
 			}
 
 		}
+		cout << "\n";
+		cout << "\n";
+
 	}
 	cout << "Calculation End!" << endl;
 	auto end = std::chrono::high_resolution_clock::now();    // 終了時刻を取得

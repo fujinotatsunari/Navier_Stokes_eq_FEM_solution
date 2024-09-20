@@ -2,7 +2,6 @@
 #include "input.hpp"
 #include "mesh.hpp"
 #include "param.hpp"
-#include"value.hpp"
 #include <vector>
 
 class Node2d {//計算格子上の節点
@@ -66,10 +65,10 @@ public:
 class Mesh2d {//計算格子
 	//1: 配列を与えるのではなく, 入力のインデックスに対応する配列の中身を与えるようにする
 	//2:このクラスの役割は計算する空間を定義し, その空間上で物理量の計算を走らせるための諸変数の提供である
-protected:
+private:
 
-	NodeP nparam_;
-	Boundarycond Bcond_;
+	NodeP& nparam_;
+	Boundarycond& Bcond_;
 	vector<Node2d> node_;
 	vector<Element2d> elem_;
 	vector<int> ncond_;//節点境界フラグ
@@ -86,6 +85,9 @@ protected:
 	
 	vector<double> X;
 	vector<double> Y;
+	vector<double> EX;
+	vector<double> EY;
+
 	vector<vector<int>> nbool1_;//nbool[要素番号][要素内節点番号]=全体節点番号
 	vector<vector<int>> nbool3_;//nbool3[要素番号][ローカルな要素番号(下,右,上,左)]=全体要素番号 ::ある要素に隣接する要素の番号
 	double xb_, xt_, yb_, yt_, dx_, dy_, Lx_, Ly_;

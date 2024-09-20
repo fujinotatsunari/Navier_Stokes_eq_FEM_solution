@@ -6,8 +6,8 @@
 using namespace std;
 
 class InputData {
-protected:
-	string start = "C:/Result/2d_Navier_Stokes/Mesh_data_box";
+private:
+	string start = "C:/Result/2d_Navier_Stokes_eq/Mesh_data_box";
 	string model;//解析モデルフォルダのなまえ
 	string modelpath;//modelのパス
 	string date;//日付フォルダのなまえ
@@ -20,7 +20,7 @@ protected:
 	vector<double> Uy;
 	vector<double> P;
 	vector<int> cond;
-	vector<int>scond;
+	vector<int> scond;
 	vector<double> x;
 	vector<double> y;
 	vector<double> ex;
@@ -69,9 +69,10 @@ public:
 	vector<double> getey();
 	vector<double> getP();
 	vector<int> getcond();
+	vector<int> getscond();
 	//クラスのゲッタ
-	NodeP get_NodeParam();
-	Boundarycond get_BC();
+	NodeP& get_NodeParam();
+	Boundarycond& get_BC();
 	string get_path();
 	string get_modelname();
 

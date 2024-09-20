@@ -1,9 +1,10 @@
 #include "mesh.hpp"
 #include "param.hpp"
-#include"value.hpp"
 #include <vector>
 #include <iostream>
 #include <cmath>
+using namespace std;
+
 Node2d::Node2d() :no(0), x(0), y(0){}
 void Node2d::setNo(int no_) {
 	no = no_;
@@ -50,6 +51,7 @@ double Element2d::getSe() {
 }
 
 Time::Time(TimeP& Tp) :ntime_(0), dt_(0), nend_(0), nsample_(0), tparam(Tp) {
+	cout << "Object generate :Time" << endl;
 	setup();
 }
 void Time::setup() {
@@ -83,6 +85,8 @@ double& Time::operator[](int n) {
 Mesh2d::Mesh2d(InputData& Input)
 	:nparam_(Input.get_NodeParam()), Bcond_(Input.get_BC()), Lx_(0), Ly_(0), xb_(0), xt_(0), yb_(0), yt_(0), dx_(0), dy_(0), xnode_(0), ynode_(0), xelem_(0), yelem_(0), nnode_(0), nelem_(0)
 {
+	cout << "Object generate: Mesh2d(input) " << endl;
+	
 	//setup();
 	xb_ = nparam_.getXb();
 	xt_ = nparam_.getXt();
@@ -92,6 +96,7 @@ Mesh2d::Mesh2d(InputData& Input)
 	dy_ = nparam_.getDy();
 	Lx_ = nparam_.getLx();
 	Ly_ = nparam_.getLy();
+
 	xnode_ = nparam_.getXnode();
 	ynode_ = nparam_.getYnode();
 	nnode_ = nparam_.getNnode();
@@ -103,13 +108,17 @@ Mesh2d::Mesh2d(InputData& Input)
 	nbool1_ = Input.getnbool1();
 	nbool3_ = Input.getnbool3();
 	ncond_ = Input.getcond();
-	scond_.resize(nparam_.getNelem());
+	scond_ = Input.getscond();
 	X = Input.getx();
 	Y = Input.gety();
+	EX = Input.getex();
+	EY = Input.getey();
+
 }
 Mesh2d::Mesh2d(NodeP& NP, Boundarycond& BC)
 	:nparam_(NP), Bcond_(BC), Lx_(0), Ly_(0), xb_(0), xt_(0), yb_(0), yt_(0), dx_(0), dy_(0), xnode_(0), ynode_(0), xelem_(0), yelem_(0), nnode_(0), nelem_(0)
 {
+	cout << "Object generate: Mesh2d " << endl;
 	xb_ = nparam_.getXb();
 	xt_ = nparam_.getXt();
 	yb_ = nparam_.getYb();
@@ -159,6 +168,7 @@ Mesh2d& Mesh2d::operator=(const Mesh2d& mesh) {
 Mesh2d::Mesh2d(const Mesh2d& mesh)
 	:nparam_(mesh.nparam_), Bcond_(mesh.Bcond_)
 {
+	cout << "Object generate :Mesh2d " << endl;
 
 	node_ = mesh.node_;
 	elem_ = mesh.elem_;
@@ -188,7 +198,9 @@ void Mesh2d::geninputmesh() {
 	for (int np = 0; np < nnode_; np++) {
 		node_[np].setNo(np);
 		node_[np].setX(X[np]);
+		//cout << "x[" << np << "]=" << X[np] << endl;
 		node_[np].setY(Y[np]);
+		//cout << "y[" << np << "]=" << Y[np] << endl;
 	}
 	for (int ie = 0; ie < nelem_; ie++) {
 		elem_[ie].setNo(ie);
@@ -197,12 +209,16 @@ void Mesh2d::geninputmesh() {
 		int i3 = nbool1_[ie][2];
 		int i4 = nbool1_[ie][3];
 
-		elem_[ie].setX(x(i1) + x(i2) + x(i3) + x(i4) / 4);//要素重心のx座標
-		elem_[ie].setY(y(i1) + y(i2) + y(i3) + y(i4) / 4);//要素重心のy座標
+		elem_[ie].setX(EX[ie]);//要素重心のx座標
+		elem_[ie].setY(EY[ie]);//要素重心のy座標
 		double S;
 		S = area(i1, i2, i3, i4);
 		elem_[ie].setSe(S);
+		cout << "S[" << ie << "]=" << S << endl;
+		cout << "EX[" << ie << "]=" << EX[ie] << "EY[" << ie << "]=" << EY[ie] << endl;
 	}
+
+	/*
 	for (int ie = 0; ie < nelem_; ie++) {
 		scond_[ie] = 0;
 	}
@@ -222,6 +238,7 @@ void Mesh2d::geninputmesh() {
 		}
 		
 	}
+	*/
 }
 
 
@@ -377,20 +394,14 @@ double Mesh2d::area(int E1, int E2) {
 	y3 = y(n1);
 	x4 = x(n2);
 	y4 = y(n2);
-	Scalar2d S;
-	//位置ベクトル
-	Vector2d V1(x1, y1);
-	Vector2d V2(x2, y2);
-	Vector2d V3(x3, y3);
-	Vector2d V4(x4, y4);
-
-	S = 0.5 * ((V3 - V1) % (V4 - V2));
-	return S.v();
+	
+	double area;
+	area = ((x3 - x1) * (y4 - y2) - (x4 - x2) * (y3 - y1)) / 2;//要素四角形の面積を求める
+	return area;
 
 }
 double Mesh2d::area(int n1, int n2, int n3, int n4) {
 
-	Scalar2d S;
 	double x1 = x(n1);
 	double x2 = x(n2);
 	double x3 = x(n3);
@@ -400,12 +411,9 @@ double Mesh2d::area(int n1, int n2, int n3, int n4) {
 	double y3 = y(n3);
 	double y4 = y(n4);
 	//位置ベクトル
-	Vector2d V1(x1, y1);
-	Vector2d V2(x2, y2);
-	Vector2d V3(x3, y3);
-	Vector2d V4(x4, y4);
-	
-	S = 0.5 * ((V3 - V1) % (V4 - V2));
-	return S.v();
+	double area;
+	area = ((x3 - x1) * (y4 - y2) - (x4 - x2) * (y3 - y1)) / 2;//要素四角形の面積を求める
+	return area;
+
 
 }

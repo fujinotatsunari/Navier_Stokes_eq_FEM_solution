@@ -10,8 +10,10 @@
 #include <sys/stat.h>
 using namespace std;
 namespace fs = std::filesystem;
+
 InputData::InputData()
 {
+	cout << "Object generate : InputData" << endl;
 	setgoal();
 	input_param();
 	input_csv();
@@ -41,16 +43,19 @@ vector<double> InputData::getP() {
 vector<int> InputData::getcond() {
 	return cond;
 }
+vector<int> InputData::getscond() {
+	return scond;
+}
 vector<vector<int>> InputData::getnbool1() {
 	return nbool1;
 }
 vector<vector<int>> InputData::getnbool3() {
 	return nbool3;
 }
-NodeP InputData::get_NodeParam() {
+NodeP& InputData::get_NodeParam() {
 	return nparam;
 }
-Boundarycond InputData::get_BC() {
+Boundarycond& InputData::get_BC() {
 	return BC;
 }
 string InputData::getmodel() {
@@ -73,11 +78,11 @@ void InputData::setmodel(){
 	modelpath = start + "/" + model;
 	struct stat statBuf;
 	if (stat(modelpath.c_str(), &statBuf) != 0) {
-		
-	}
-	else {
 		cout << modelpath << "は存在しません" << endl;
 		exit(-1);
+	}
+	else {
+		
 	}
 }
 void InputData::setdate() {
@@ -89,11 +94,11 @@ void InputData::setdate() {
 	datepath = modelpath + "/" + date;
 	struct stat statBuf;
 	if (stat(datepath.c_str(), &statBuf) != 0) {
-
-	}
-	else {
 		cout << datepath << "は存在しません" << endl;
 		exit(-1);
+	}
+	else {
+		
 	}
 }
 void InputData::setdata() {
@@ -105,11 +110,11 @@ void InputData::setdata() {
 	datapath = datepath + "/" + data;
 	struct stat statBuf;
 	if (stat(datapath.c_str(), &statBuf) != 0) {
-
-	}
-	else {
 		cout << datapath << "は存在しません" << endl;
 		exit(-1);
+	}
+	else {
+		
 	}
 }
 void InputData::setgoal() {
@@ -117,11 +122,11 @@ void InputData::setgoal() {
 	goalpath = datapath + "/" + goal;
 	struct stat statBuf;
 	if (stat(goalpath.c_str(), &statBuf) != 0) {
-
-	}
-	else {
 		cout << goalpath << "は存在しません" << endl;
 		exit(-1);
+	}
+	else {
+		
 	}
 }
 void InputData::input_param() {

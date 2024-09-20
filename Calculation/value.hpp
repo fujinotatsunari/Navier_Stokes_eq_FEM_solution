@@ -32,7 +32,6 @@ class ScalarField2d {//二次元スカラー場クラス
 	//Mesh2d上でスカラー場を定める.
 protected:
 	int size;//scalar_の要素数
-
 	Mesh2d& mesh;
 	Boundarycond& Bcond;
 	vector<Scalar2d> scalar;

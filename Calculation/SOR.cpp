@@ -6,8 +6,13 @@
 using namespace std;
 
 SORparam::SORparam(Mesh2d& Mesh) 
-	:mesh(Mesh)
+	:mesh(Mesh),nmax(0),eps(0.0)
 {
+	cout << "Object generate: SORparameter" << endl;
+	cout << "同時緩和法最大反復回数 nmax ->";
+	cin >> nmax;
+	cout << "同時緩和法収束判定値 eps ->";
+	cin >> eps;
 	int nelem = mesh.nelem();
 
 	lambda.resize(nelem);
@@ -40,60 +45,76 @@ SORparam::SORparam(Mesh2d& Mesh)
 
 
 		if (mesh.scond(ie) != 1) {//ieが障害物要素ではない
-			if (Ed != -1 && mesh.scond(Ed) != 1) {//Edが範囲外でないかつ障害物要素ではない
-				Sd = mesh.area(ie, Ed);
-				A[0] = sd * sd / (2 * Sd);
-			}
-			else {//Edが範囲外または障害物要素
-				if (mesh.ncond(n1) != 0 || mesh.ncond(n2) != 0) {//Edに接する点が内部点ではない
-					if (mesh.ncond(n1) == 3 && mesh.ncond(n2) == 3) {//Edに接する点が流出(neumann)壁面である
-						nflagd = 1;
-					}
-					else {//Edに接する点が流出壁面以外
-						A[0] = 0.0;
-					}
+
+			if (Ed != -1) {//Ed(下側要素)が範囲外でない
+				if (mesh.scond(Ed) != 1) {//下側要素が障害物要素でない
+					Sd = mesh.area(ie, Ed);
+					A[0] = sd * sd / (2 * Sd);
+				}
+				else {//下側要素が障害物要素
+					A[0] = 0.0;
 				}
 			}
-			if (Er != -1 && mesh.scond(Er) != 1) {//Erが範囲外でないかつ障害物要素ではない
-				Sr = mesh.area(ie, Er);
-				A[1] = sr * sr / (2 * Sr);
-			}
-			else {//Erが範囲外または障害物要素
-				if (mesh.ncond(n2) != 0 || mesh.ncond(n3) != 0) {//Erに接する点が内部店ではない
-					if (mesh.ncond(n2) == 3 && mesh.ncond(n3) == 3) {//Erに接する点が流出(neumann)壁面である
-						nflagr = 1;
-					}
-					else {//Erに接する点が流出壁面以外
-						A[1] = 0.0;
-					}
+			else {//Edが範囲外
+				if (mesh.ncond(n1) == 3 && mesh.ncond(n2) == 3) {//Edに接する点が流出(neumann)壁面である
+					nflagd = 1;
+				}
+				else {//Edに接する点が流出壁面以外
+					A[0] = 0.0;
 				}
 			}
-			if (Eu != -1 && mesh.scond(Eu) != 1) {//Euが範囲外でないかつ障害物要素ではない
-				Su = mesh.area(ie, Eu);
-				A[2] = su * su / (2 * Su);
-			}
-			else {//Euが範囲外または障害物要素
-				if (mesh.ncond(n3) != 0 || mesh.ncond(n4) != 0) {//Euに接する点が内部店ではない
-					if (mesh.ncond(n3) == 3 && mesh.ncond(n4) == 3) {//Euに接する点が流出(neumann)壁面である
-						nflagu = 1;
-					}
-					else {//Euに接する点が流出壁面以外
-						A[2] = 0.0;
-					}
+
+			if (Er != -1) {//Er(右側要素)が範囲外でない
+				if (mesh.scond(Er) != 1) {//右側要素が障害物要素ではない
+					Sr = mesh.area(ie, Er);
+					A[1] = sr * sr / (2 * Sr);
+				}
+				else {//右側要素は障害物要素
+					A[1] = 0.0;
 				}
 			}
-			if (El != -1 && mesh.scond(El) != 1) {//Elが範囲外でないかつ障害物要素ではない
-				Sl = mesh.area(ie, El);
-				A[3] = sl * sl / (2 * Sl);
+			else {//Erが範囲外
+				if (mesh.ncond(n2) == 3 && mesh.ncond(n3) == 3) {//Erに接する点が流出(neumann)壁面である
+					nflagr = 1;
+				}
+				else {//Erに接する点が流出壁面以外
+					A[1] = 0.0;
+				}
 			}
-			else {//Elが範囲外または障害物要素
-				if (mesh.ncond(n4) != 0 || mesh.ncond(n1) != 0) {//Elに接する点が内部店ではない
-					if (mesh.ncond(n4) == 3 && mesh.ncond(n1) == 3) {//Elに接する点が流出(neumann)壁面である
-						nflagl = 1;
-					}
-					else {//Euに接する点が流出壁面以外
-						A[3] = 0.0;
-					}
+
+			if (Eu != -1) {//Euが範囲外でない
+				if (mesh.scond(Eu) != 1) {//上側要素が障害物要素でない
+					Su = mesh.area(ie, Eu);
+					A[2] = su * su / (2 * Su);
+				}
+				else {//上側要素が障害物要素
+					A[2] = 0.0;
+				}
+			}
+			else {//Euが範囲外
+				if (mesh.ncond(n3) == 3 && mesh.ncond(n4) == 3) {//Euに接する点が流出(neumann)壁面である
+					nflagu = 1;
+				}
+				else {//Euに接する点が流出壁面以外
+					A[2] = 0.0;
+				}
+			}
+
+			if (El != -1) {//Elが範囲外でない
+				if (mesh.scond(El) != 1) {//左側要素が障害物要素でない
+					Sl = mesh.area(ie, El);
+					A[3] = sl * sl / (2 * Sl);
+				}
+				else {//左側要素が障害物要素
+					A[3] = 0.0;
+				}	
+			}
+			else {//Elが範囲外
+				if (mesh.ncond(n4) == 3 && mesh.ncond(n1) == 3) {//Elに接する点が流出(neumann)壁面である
+					nflagl = 1;
+				}
+				else {//Elに接する点が流出壁面以外
+					A[3] = 0.0;
 				}
 			} 
 			// 1辺がneumann境界条件のとき
@@ -109,8 +130,14 @@ SORparam::SORparam(Mesh2d& Mesh)
 			if (nflagl == 1) {
 				A[3] = A[1];
 			}
+			cout << ie << endl;
 
+			cout << "A0=" << A[0] << " A1=" << A[1] << " A2=" << A[2] << " A3=" << A[3] << endl;
+			cout << "sd=" << sd << " sr=" << sr << " su=" << su << " sl=" << sl << endl;
+			cout << "Sd=" << Sd << " Sr=" << Sr << " Su=" << Su << " Sl=" << Sl << endl;
 			lambda[ie] = (A[0] + A[1] + A[2] + A[3]) / mesh.Se(ie);
+			cout << "lambda[" << ie << "]=" << lambda[ie] << endl;
+
 		}
 		else {
 			lambda[ie] = -1;

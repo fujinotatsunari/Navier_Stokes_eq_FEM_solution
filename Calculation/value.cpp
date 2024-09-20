@@ -5,10 +5,11 @@
 #include <vector>
 #include <iostream>
 using namespace std;
-# define PI 3.14159265359
+
 
 Scalar2d::Scalar2d() :V(0) {}
-Scalar2d::Scalar2d(double val) :V(val) {}
+Scalar2d::Scalar2d(double val) :V(val)
+{}
 
 double& Scalar2d::operator[](int i) {
 	return V;
@@ -194,6 +195,7 @@ Vector2d& VectorField2d::operator[](int i) {
 Pressure::Pressure(Mesh2d& Mesh, Boundarycond& BC)
 	:ScalarField2d(Mesh, BC), nelem(Mesh.nelem())
 {
+	cout << "Object generate: Pressure " << endl;
 	scalar.resize(nelem);
 	
 }
@@ -206,6 +208,7 @@ void Pressure::input(InputData& input) {
 Velocity2d::Velocity2d(Mesh2d& Mesh, Boundarycond& BC) 
 	:VectorField2d(Mesh, BC), nnode(Mesh.nnode())
 {
+	cout << "Object generate: Velocity2d " << endl;
 	vector.resize(nnode);
 }
 
