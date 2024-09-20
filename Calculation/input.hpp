@@ -20,8 +20,11 @@ protected:
 	vector<double> Uy;
 	vector<double> P;
 	vector<int> cond;
+	vector<int>scond;
 	vector<double> x;
 	vector<double> y;
+	vector<double> ex;
+	vector<double> ey;
 	vector<vector<int>> nbool1;
 	vector<vector<int>> nbool3;
 	vector<int> i1;
@@ -62,11 +65,15 @@ public:
 	vector<double> getUy();
 	vector<double> getx();
 	vector<double> gety();
+	vector<double> getex();
+	vector<double> getey();
 	vector<double> getP();
 	vector<int> getcond();
 	//クラスのゲッタ
 	NodeP get_NodeParam();
 	Boundarycond get_BC();
+	string get_path();
+	string get_modelname();
 
 };
 void viewdir(string path);//path直下のフォルダを表示

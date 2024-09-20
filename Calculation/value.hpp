@@ -45,14 +45,14 @@ public:
 
 class Vector2d {
 private:
-	double x_, y_;
+	double x, y;
 public:
 	Vector2d();
 	Vector2d(double X, double Y);
 	Vector2d(const Vector2d& V);
 	double& operator[](int i);
 	double const& operator[](int i) const;
-
+	double norm() const;//ベクトルの大きさの取得
 	Vector2d& operator=(const Vector2d& V);
 	Vector2d& operator+=(const Vector2d& V);
 	Vector2d& operator-=(const Vector2d& V);
@@ -78,7 +78,7 @@ public:
 	VectorField2d(Mesh2d& Mesh, Boundarycond& BC);
 	const Vector2d& operator[](int i)const;
 	Vector2d& operator[](int i);
-
+	
 };
 class Pressure :public ScalarField2d {
 private:
@@ -90,27 +90,15 @@ public:
 	//void cavity_init();//キャビティ流れの初期化(圧力編)
 	//void backstep_init();//バックステップ流れの初期化
 };
-/*
-class PHI :public ScalarField2d {//移流拡散方程式の物理量phi
-private:
-	int nnode;//va配列の大きさnnodeに対応
-public:
-	PHI(Mesh2d& mesh, Boundarycond& BC);
-	void init();
-	
-	//void initialize_default();//左端と下端に1を与える
-	//void initialize_deltafunc();//デルタ関数型の初期条件(
-	//void initialize_cosfunc();//cos関数型の初期条件
 
-};
-*/
+
 class Velocity2d :public VectorField2d {
 private:
 	int nnode;
 public:
 	Velocity2d(Mesh2d& mesh, Boundarycond& BC);
-
 	void input(InputData& input);
+
 	//void init();//初期化
 	//void cavity_init();//キャビティ流れの初期化(流速編)
 	//void backstep_init();//バックステップ流れの初期化

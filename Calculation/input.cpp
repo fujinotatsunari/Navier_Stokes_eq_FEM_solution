@@ -15,7 +15,7 @@ InputData::InputData()
 	setgoal();
 	input_param();
 	input_csv();
-	input_mesh();
+	//input_mesh();
 }
 vector<double> InputData::getUx() {
 	return Ux;
@@ -146,6 +146,8 @@ void InputData::input_param() {
 			if (count == 2) {//3行目 xelem,yelem,,,,
 				nparam.setXelem(stoi(v[0]));
 				nparam.setYelem(stoi(v[1]));
+				nparam.setXnode(stoi(v[2]));
+				nparam.setYnode(stoi(v[3]));
 			}
 			if (count == 3) {//4行目 nelem,nnode,,,,
 				nparam.setNelem(stoi(v[0]));
@@ -158,6 +160,7 @@ void InputData::input_param() {
 				BC.setBCflagD(stoi(v[3]));
 				BC.setBCflagC(stoi(v[4]));
 			}
+			v.clear();
 			count++;
 		
 		}
@@ -170,8 +173,6 @@ void InputData::input_param() {
 
 	nparam.setLx(nparam.getXt() - nparam.getXb());
 	nparam.setLy(nparam.getYt() - nparam.getYb());
-	nparam.setXnode(nparam.getXelem() + 1);
-	nparam.setYnode(nparam.getYelem() + 1);
 
 }
 void InputData::input_mesh() {
@@ -255,43 +256,62 @@ void InputData::input_mesh() {
 void InputData::input_csv() {
 	
 	int count = 0;
-	string filename1 = goalpath + "/" + "BC.csv";
-	string filename2 = goalpath + "/" + "P.csv";
-	string filename3 = goalpath + "/" + "Ux.csv";
-	string filename4 = goalpath + "/" + "Uy.csv";
-	vector<string> filenames = { filename1,filename2,filename3,filename4 };
-
-	for (const auto& filename : filenames) {
+	//1ファイル1配列
+	string filename1 = goalpath + "/" + "P.csv";//圧力
+	string filename2 = goalpath + "/" + "U.csv";//流速x
+	string filename3 = goalpath + "/" + "V.csv";//流速y
+	string filename4 = goalpath + "/" + "ncond.csv";//境界条件
+	string filename5 = goalpath + "/" + "scond.csv";//要素フラグ
+	
+	//1ファイル2配列
+	string filename6 = goalpath + "/" + "node.csv";//節点座標
+	string filename7 = goalpath + "/" + "snode.csv";//重心座標
+	//1ファイル4配列
+	string filename8 = goalpath + "/" + "nbool1.csv";//nbool1
+	string filename9 = goalpath + "/" + "nbool3.csv";//nbool3
+	
+	vector<string> filenames1 = { filename1,filename2,filename3,filename4 ,filename5 };
+	vector<string> filenames2 = { filename6,filename7 };
+	vector<string> filenames3 = { filename8,filename9 };
+	//
+	count = 0;
+	for (const auto& filename : filenames1) {//1ファイルごとにみていく
 		ifstream file(filename);
 		string line;
 		if (file.is_open()) {
 			vector<string> v;
-			while (getline(file, line)) {
+			while (getline(file, line)) {//1ファイルを行ごとに見ていく
 				stringstream ss(line);
 				string value;
-				while (getline(ss, value, ',')) {
+				while (getline(ss, value, ',')) {//1行をカンマ区切りでvに追加
 					v.push_back(value);
 				}
-				
 			}
-			if (count == 0) {//1ファイル目BC.csv
-				for (int i = 0; i < v.size(); i++) {
-					cond.push_back(stoi(v[i]));
-				}
-			}
-			if (count == 1) {//2ファイル目P.csv
+			//この時点でファイル終端に達する(vには１ファイルのすべてのデータがある)
+
+			if (count == 0) {//1ファイル目P.csv
 				for (int i = 0; i < v.size(); i++) {
 					P.push_back(stod(v[i]));
 				}
 			}
-			if (count == 2) {//3ファイル目Ux.csv
+			if (count == 1) {//2ファイル目U.csv
 				for (int i = 0; i < v.size(); i++) {
 					Ux.push_back(stod(v[i]));
 				}
 			}
-			if (count == 3) {//4ファイル目Uy.csv
+			if (count == 2) {//3ファイル目V.csv
 				for (int i = 0; i < v.size(); i++) {
 					Uy.push_back(stod(v[i]));
+				}
+			}
+			if (count == 3) {//4ファイル目ncond.csv
+				for (int i = 0; i < v.size(); i++) {
+					cond.push_back(stoi(v[i]));
+				}
+			}
+			if (count == 4) {//4ファイル目scond.csv
+				for (int i = 0; i < v.size(); i++) {
+					scond.push_back(stoi(v[i]));
 				}
 			}
 			file.close();
@@ -304,9 +324,98 @@ void InputData::input_csv() {
 			exit(-1);
 		}
 	}
+	count = 0;
+	for (const auto& filename : filenames2) {
+		ifstream file(filename);
+		string line;
+		if (file.is_open()) {
+			while (getline(file, line)) {
+				vector<string> v;
+				stringstream ss(line);
+				string value;
+				while (getline(ss, value, ',')) {
+					v.push_back(value);
+				}
+				if (count == 0) {//1ファイル目node.csv
+					x.push_back(stod(v[0]));
+					y.push_back(stod(v[1]));
+				}
+				if (count == 1) {//2ファイル目snode.csv
+					ex.push_back(stod(v[0]));
+					ey.push_back(stod(v[1]));
+				}
+				v.clear();
 
+			}
+			file.close();
+			count++;
+		}
+		else {
+			cout << filename << "を開けませんでした" << endl;
+			exit(-1);
+		}
+	}
+	count = 0;
+	for (const auto& filename : filenames3) {
+		ifstream file(filename);
+		string line;
+		if (file.is_open()) {
+			while (getline(file, line)) {
+				vector<string> v;
+				stringstream ss(line);
+				string value;
+				while (getline(ss, value, ',')) {
+					v.push_back(value);
+				}
+				if (count == 0) {//1ファイル目nbool1.csv
+					i1.push_back(stoi(v[0]));
+					i2.push_back(stoi(v[1]));
+					i3.push_back(stoi(v[2]));
+					i4.push_back(stoi(v[3]));
+				}
+				if (count == 1) {//2ファイル目nbool3.csv
+					e1.push_back(stoi(v[0]));
+					e2.push_back(stoi(v[1]));
+					e3.push_back(stoi(v[2]));
+					e4.push_back(stoi(v[3]));
+				}
+				v.clear();
+			}
+			
+			file.close();
+			count++;
+		}
+		else {
+			cout << filename << "を開けませんでした" << endl;
+			exit(-1);
+		}
+	}
+
+	nbool1.resize(nparam.getNelem());
+	nbool3.resize(nparam.getNelem());
+	for (int ie = 0; ie < nparam.getNelem(); ie++) {
+		nbool1[ie].resize(4);
+		nbool3[ie].resize(4);
+	}
+	for (int ie = 0; ie < nparam.getNelem(); ie++) {
+		nbool1[ie][0] = i1[ie];
+		nbool1[ie][1] = i2[ie];
+		nbool1[ie][2] = i3[ie];
+		nbool1[ie][3] = i4[ie];
+
+		nbool3[ie][0] = e1[ie];
+		nbool3[ie][1] = e2[ie];
+		nbool3[ie][2] = e3[ie];
+		nbool3[ie][3] = e4[ie];
+	}
 }
 
+string InputData::get_path() {
+	return goalpath;
+}
+string InputData::get_modelname() {
+	return model;
+}
 
 void viewdir(string path) {
 	for (const fs::directory_entry& x : fs::directory_iterator(path)) {

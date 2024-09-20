@@ -77,18 +77,18 @@ const Scalar2d& ScalarField2d::operator[](int i)const {
 Scalar2d& ScalarField2d::operator[](int i) {
 	return scalar[i];
 }
-Vector2d::Vector2d() :x_(0),y_(0){}
-Vector2d::Vector2d(double X,double Y):x_(X),y_(Y){}
+Vector2d::Vector2d() :x(0),y(0){}
+Vector2d::Vector2d(double X,double Y):x(X),y(Y){}
 Vector2d::Vector2d(const Vector2d& V) {
-	x_ = V.x_;
-	y_ = V.y_;
+	x = V.x;
+	y = V.y;
 }
 double& Vector2d::operator[](int i) {
 	if (i == 0) {//x成分を返す
-		return x_;
+		return x;
 	}
 	else if (i == 1) {
-		return y_;//y成分を返す
+		return y;//y成分を返す
 	}
 	else {
 		cout << "ベクトルの要素範囲外です" << endl;
@@ -97,31 +97,34 @@ double& Vector2d::operator[](int i) {
 }
 const double& Vector2d::operator[](int i) const {
 	if (i == 0) {//x成分を返す
-		return x_;
+		return x;
 	}
 	else if (i == 1) {
-		return y_;//y成分を返す
+		return y;//y成分を返す
 	}
 	else {
 		cout << "ベクトルの要素範囲外です" << endl;
 		exit(-1);
 	}
 }
+double Vector2d::norm() const {
+	return sqrt(x * x + y * y);
+}
 Vector2d& Vector2d::operator=(const Vector2d& V) {
-	x_ = V.x_;
-	y_ = V.y_;
+	x = V.x;
+	y = V.y;
 
 	return *this;
 }
 Vector2d& Vector2d::operator+=(const Vector2d& V) {
-	x_ += V.x_;
-	y_ += V.y_;
+	x += V.x;
+	y += V.y;
 
 	return *this;
 }
 Vector2d& Vector2d::operator-=(const Vector2d& V) {
-	x_ -= V.x_;
-	y_ -= V.y_;
+	x -= V.x;
+	y -= V.y;
 
 	return *this;
 }
@@ -199,26 +202,6 @@ void Pressure::input(InputData& input) {
 		scalar[ie] = input.getP()[ie];
 	}
 }
-/*
-void Pressure::init() {
-	
-	for (int j = 0; j < mesh.yelem(); j++) {
-		for (int i = 0; i < mesh.xelem(); i++) {
-			int ie = i + mesh.xelem() * j;
-			scalar[ie] = 0.0;
-
-		}
-	}
-}
-void Pressure::cavity_init() {
-	init();
-
-}
-
-void Pressure::backstep_init() {
-	init();
-}
-*/
 
 Velocity2d::Velocity2d(Mesh2d& Mesh, Boundarycond& BC) 
 	:VectorField2d(Mesh, BC), nnode(Mesh.nnode())
@@ -232,122 +215,3 @@ void Velocity2d::input(InputData& input) {
 		vector[np] = V;
 	}
 }
-/*
-void Velocity2d::init() {
-	Vector2d V(0.0, 0.0);
-	for (int j = 0; j < mesh.ynode(); j++) {
-		for (int i = 0; i < mesh.xnode(); i++) {
-			int np = i + mesh.xnode() * j;
-			vector[np] = V;
-
-		}
-	}
-}
-void Velocity2d::cavity_init() {
-	init();
-	Vector2d V(1.0, 0.0);
-	for (int j = 0; j < mesh.ynode(); j++) {
-		for (int i = 0; i < mesh.xnode(); i++) {
-			int np = i + mesh.xnode() * j;
-			if (mesh.ncond(np) == 4) {//4:移動壁面条件(壁面接線方向に流速固定値1)
-				vector[np] = V;
-			}
-		}
-	}
-}
-void Velocity2d::backstep_init() {
-	init();
-	Vector2d V(1.0, 0.0);
-	for (int j = 0; j < mesh.ynode(); j++) {
-		for (int i = 0; i < mesh.xnode(); i++) {
-			int np = i + mesh.xnode() * j;
-			if (mesh.ncond(np) == 2) {//2:流入壁面(壁面法線方向に流速固定値1)
-				vector[np] = V;
-			}
-		}
-	}
-	
-
-}*/
-/*
-PHI::PHI(Mesh2d& Mesh, Boundarycond& BC)
-	:ScalarField2d(Mesh, BC),nnode(Mesh.nnode())
-{
-	scalar.resize(nnode);
-}
-void PHI::init() {
-	for (int j = 0; j < mesh.ynode(); j++) {
-		for (int i = 0; i < mesh.xnode(); i++) {
-			int np = i + mesh.xnode() * j;
-			scalar[np][0] = 0.0;
-
-		}
-	}
-}
-*/
-/*
-PHI::PHI(Mesh2d& mesh, Boundarycond& BC)
-	:ScalarField2d(mesh, BC)
-{
-	setup();
-}
-void PHI::setup() {
-	scalar_.resize(mesh_.nnode());
-	value.resize(mesh_.nnode());
-	for (int i = 0; i < scalar_.size(); i++) {
-		scalar_[i].setNo(i);
-		scalar_[i].setX(mesh_.x(i));
-		scalar_[i].setY(mesh_.y(i));
-		scalar_[i].setV(0.0);
-		value[i] = scalar_[i].getV();
-	}
-}
-void PHI::initialize_default() {
-	//初期条件の設定
-	for (int j = 0; j < mesh_.ynode(); j++) {
-		for (int i = 0; i < mesh_.xnode(); i++) {
-			int np = i + mesh_.xnode() * j;
-
-			if (i == 0) {//左端
-				value[np] = Bcond_.getdL();;
-				scalar_[np].setV(value[np]);
-			}
-			else if (j == 0) {//下端
-				value[np] = Bcond_.getdD();
-				scalar_[np].setV(value[np]);
-			}
-			else {
-				value[np] = 0.0;
-				scalar_[np].setV(value[np]);
-			}
-			//cout << "value[" << np << "]=" << value[np] << endl;
-		}
-	}
-	//境界条件の設定
-	for (int j = 0; j < mesh_.ynode(); j++) {
-		for (int i = 0; i < mesh_.xnode(); i++) {
-			int np = i + mesh_.xnode() * j;
-			if (mesh_.ncond(np) == 1) {//dirichlet境界条件
-				if (i == 0) {//左壁面
-					value[np] = Bcond_.getdL();
-					scalar_[np].setV(value[np]);
-				}
-				if (j == 0) {//下壁面
-					value[np] = Bcond_.getdD();
-					scalar_[np].setV(value[np]);
-				}
-				if (i == mesh_.xnode() - 1) {//右壁面
-					//value[np] = Bcond_.getdR();
-					//scalar_[np].setV(value[np]);
-				}
-				if (j == mesh_.ynode() - 1) {//上壁面
-					//value[np] = Bcond_.getdU();
-					//scalar_[np].setV(value[np]);
-				}
-
-			}
-		}
-	}
-	
-}
-*/

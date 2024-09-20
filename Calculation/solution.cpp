@@ -11,6 +11,7 @@
 #include<iostream>
 
 using namespace std;
+
 Divergence::Divergence(Mesh2d& Mesh,Boundarycond& BC)//発散量
 	:ScalarField2d(Mesh, BC),size(Mesh.nelem())
 {
@@ -425,21 +426,37 @@ double SOR::get_nor() {
 double SOR::max_div() {
 	return div_max;
 }
-HSMAC_FEM::HSMAC_FEM(Velocity2d& v, Pressure& p, Time& T, Mesh2d& Mesh, NDNSparam& NSP, SORparam& SRP, Boundarycond& bc)
-	:V(v), P(p), t(T), mesh(Mesh), nsparam(NSP), sorparam(SRP), BC(bc)
+HSMAC_FEM::HSMAC_FEM(Velocity2d& v, Pressure& p, Time& T, Mesh2d& Mesh, NDNSparam& NSP, SORparam& SRP, Boundarycond& bc, InputData& INPUT)
+	:V(v), P(p), t(T), mesh(Mesh), nsparam(NSP), sorparam(SRP), BC(bc),input(INPUT)
 {
 
 }
 void HSMAC_FEM::do_solution() {
 	Predictor Vp;//流速予測子計算オブジェクト
 	SOR S(sorparam);//同時緩和法計算オブジェクト
+	OutputData output(mesh, t, BC, V, P, nsparam);//出力用オブジェクト
+	output.set_scheme("HSMAC");
+	output.set_model(input.get_modelname());
+	output.set_path(input.getgoal());
+	output.set_Filestage(0);
+
 
 	//時間進行の開始
 	cout << "End of setting up initial condition" << endl;
 	cout << "scheme:  HSMAC FEM" << endl;
+	cout << "model :" << output.get_model() << "_flow" << endl;
 	cout << "Caluculatoin Start !" << endl;
 	auto start= std::chrono::high_resolution_clock::now();//総計算時間 開始時刻取得
-	for (int n = 0; n <= t.nend(); n++) {
+	cout << "Step No.0   Save Initial Result" << endl;
+
+	output.output_condition();//計算条件の出力
+	output.output_time_csv(0);//0ステップの出力
+
+	if (output.get_model() == "cavity") {
+		output.output_ghia(0);
+	}
+
+	for (int n = 1; n <= t.nend(); n++) {//1stepからスタート
 		auto step_start = std::chrono::high_resolution_clock::now();//1step計算時間 開始時刻取得
 
 
@@ -449,14 +466,20 @@ void HSMAC_FEM::do_solution() {
 		NOR = S.get_nor();//同時緩和法反復回数の取得
 		max_div = S.max_div();
 
-		view_parameters(n);//計算パラメータの表示
-		auto step_end = std::chrono::high_resolution_clock::now();    // 1step終了時刻を取得
-		auto step_duration = std::chrono::duration_cast<std::chrono::seconds>(step_end - step_start);  // 1step計算時間を秒に変換
-		auto step_duration_sum = std::chrono::duration_cast<std::chrono::seconds>(step_end - start);  // 累計計算時間を秒に変換
-		cout << "Step No." << n << " :calculation time : " << step_duration.count() << " s" << endl;
-		cout << "Cumulative caluculation time: " << step_duration_sum.count() << " s" << endl;
+		
 		
 		if (n % t.nsample() == 0) {//ステップ数が出力ステップ数のとき
+			view_parameters(n);//計算パラメータの表示
+			auto step_end = std::chrono::high_resolution_clock::now();    // 1step終了時刻を取得
+			auto step_duration = std::chrono::duration_cast<std::chrono::seconds>(step_end - step_start);  // 1step計算時間を秒に変換
+			auto step_duration_sum = std::chrono::duration_cast<std::chrono::seconds>(step_end - start);  // 累計計算時間を秒に変換
+			cout << "Step No." << n << " :calculation time : " << step_duration.count() << " s" << endl;
+			cout << "Cumulative caluculation time: " << step_duration_sum.count() << " s" << endl;
+			output.update(V, P);//V,Pの更新(出力のための)
+			output.output_time_csv(n);
+			if (output.get_model() == "cavity") {
+				output.output_ghia(n);
+			}
 
 		}
 	}

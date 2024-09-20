@@ -2,6 +2,7 @@
 #include"solution.hpp"
 #include"output.hpp"
 #include"FEM.hpp"
+#include"input.hpp"
 #include"SOR.hpp"
 #include"value.hpp"
 #include"Mesh.hpp"
@@ -18,11 +19,12 @@ private:
 	NDNSparam& nsparam;
 	SORparam& sorparam;
 	Boundarycond& BC;
+	InputData& input;
 	int NOR;//同時緩和法反復回数
 	double max_div;//発散量の最大値
 
 public:
-	HSMAC_FEM(Velocity2d& v, Pressure& p, Time& T, Mesh2d& Mesh, NDNSparam& NSP, SORparam& SRP, Boundarycond& bc);
+	HSMAC_FEM(Velocity2d& v, Pressure& p, Time& T, Mesh2d& Mesh, NDNSparam& NSP, SORparam& SRP, Boundarycond& bc, InputData& INPUT);
 	void do_solution();//HSMAC法による計算の開始
 	double Uxmax();//流速x成分最大値(絶対値が一番大きい値の絶対値をつける前の値を返す)
 	double Uymax();//流速y成分最大値(絶対値が一番大きい値の絶対値をつける前の値を返す)
@@ -76,3 +78,7 @@ public:
 
 };
 
+//作るやつ
+//完全陰解法+直接法+人工圧縮性法 FID-ACmethod
+//半陰解法(移流項の線形化)+直接法+人工圧縮性法 SID-ACmehtod
+//SIMPLER法(burgers+poisson分離陰解法)
