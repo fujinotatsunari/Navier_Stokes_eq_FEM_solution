@@ -234,8 +234,8 @@ void Mesh2d::generate() {
 			int i3 = nbool1_[ie][2];
 			int i4 = nbool1_[ie][3];
 
-			elem_[ie].setX(x(i1) + x(i2) + x(i3) + x(i4) / 4);//要素重心のx座標
-			elem_[ie].setY(y(i1) + y(i2) + y(i3) + y(i4) / 4);//要素重心のy座標
+			elem_[ie].setX((x(i1) + x(i2) + x(i3) + x(i4)) / 4);//要素重心のx座標
+			elem_[ie].setY((y(i1) + y(i2) + y(i3) + y(i4)) / 4);//要素重心のy座標
 			double S;//要素面積
 			S = area(i1, i2, i3, i4);//算出
 			elem_[ie].setSe(S);
@@ -509,8 +509,8 @@ void CavityMesh2d::generate()
 			int i3 = nbool1_[ie][2];
 			int i4 = nbool1_[ie][3];
 
-			elem_[ie].setX(x(i1) + x(i2) + x(i3) + x(i4) / 4);//要素重心のx座標
-			elem_[ie].setY(y(i1) + y(i2) + y(i3) + y(i4) / 4);//要素重心のy座標
+			elem_[ie].setX((x(i1) + x(i2) + x(i3) + x(i4)) / 4);//要素重心のx座標
+			elem_[ie].setY((y(i1) + y(i2) + y(i3) + y(i4)) / 4);//要素重心のy座標
 			double S;//要素面積
 			S = area(i1, i2, i3, i4);//算出
 			elem_[ie].setSe(S);
@@ -634,8 +634,8 @@ void BackstepMesh2d::generate() {
 			int i3 = nbool1_[ie][2];
 			int i4 = nbool1_[ie][3];
 
-			elem_[ie].setX(x(i1) + x(i2) + x(i3) + x(i4) / 4);//要素重心のx座標
-			elem_[ie].setY(y(i1) + y(i2) + y(i3) + y(i4) / 4);//要素重心のy座標
+			elem_[ie].setX((x(i1) + x(i2) + x(i3) + x(i4)) / 4);//要素重心のx座標
+			elem_[ie].setY((y(i1) + y(i2) + y(i3) + y(i4)) / 4);//要素重心のy座標
 			double S;//要素面積
 			S = area(i1, i2, i3, i4);//算出
 			elem_[ie].setSe(S);
@@ -796,8 +796,8 @@ void SquarePillarMesh2d::generate() {
 			int i3 = nbool1_[ie][2];
 			int i4 = nbool1_[ie][3];
 
-			elem_[ie].setX(x(i1) + x(i2) + x(i3) + x(i4) / 4);//要素重心のx座標
-			elem_[ie].setY(y(i1) + y(i2) + y(i3) + y(i4) / 4);//要素重心のy座標
+			elem_[ie].setX((x(i1) + x(i2) + x(i3) + x(i4)) / 4);//要素重心のx座標
+			elem_[ie].setY((y(i1) + y(i2) + y(i3) + y(i4)) / 4);//要素重心のy座標
 			double S;//要素面積
 			S = area(i1, i2, i3, i4);//算出
 			elem_[ie].setSe(S);
