@@ -420,7 +420,7 @@ void SOR::do_calculation(Velocity2d& v, Pressure& p, Time& T, Mesh2d& Mesh, SORp
 		nor++;//反復回数の更新
 	} while ((div_max > param.get_eps()) && (nor < param.get_nmax()));
 }
-double SOR::get_nor() {
+int SOR::get_nor() {
 	return nor;
 }
 double SOR::max_div() {

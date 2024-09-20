@@ -29,6 +29,12 @@ vector<double> InputData::getx() {
 vector<double> InputData::gety() {
 	return y;
 }
+vector<double> InputData::getex() {
+	return ex;
+}
+vector<double> InputData::getey() {
+	return ey;
+}
 vector<double> InputData::getP() {
 	return P;
 }

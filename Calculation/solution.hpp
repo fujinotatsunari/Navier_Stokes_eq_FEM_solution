@@ -53,7 +53,7 @@ private:
 public:
 	SOR(SORparam& Param);
 	void do_calculation(Velocity2d& v, Pressure& p, Time& T, Mesh2d& Mesh, SORparam& param, Boundarycond& BC);
-	double get_nor();
+	int get_nor();
 	double max_div();//発散量の最大値を返す
 
 };
