@@ -14,8 +14,10 @@ private:
 	string datepath;//dateのパス
 	string data;//data_nフォルダのなまえ
 	string datapath;//dataのパス
-	string goal = "mesh_data_box";//目的フォルダ
-	string goalpath;//目的フォルダのパス
+	string goal = "mesh_data_box";//目的フォルダ1
+	string goal2 = "data_box";//目的フォルダ2
+	string goalpath;//目的フォルダ1のパス
+	string goalpath2;//目的フォルダ2のパス
 	vector<double> Ux;
 	vector<double> Uy;
 	vector<double> P;
