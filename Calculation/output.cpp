@@ -258,15 +258,15 @@ void OutputData::get_ghia() {
 	for (int j = 0; j < mesh.ynode(); j++) {
 		for (int i = 0; i < mesh.xnode(); i++) {
 			int np = i + mesh.xnode() * j;
-			if (mesh.x(np) <= mesh.Lx() / 2) {
-				if (mesh.x(np + 1) > mesh.Lx() / 2) {
+			if (mesh.x(np) <= mesh.xb() + mesh.Lx() / 2) {
+				if (mesh.x(np + 1) > mesh.xb() + mesh.Lx() / 2) {
 					ghiau.push_back(V[np][0]);//y軸上でのx方向流速
 					ghiay.push_back(mesh.y(np));//対応するy軸座標
 				}
 			}
 
-			if (mesh.y(np) <= mesh.Ly() / 2) {
-				if (mesh.y(np + mesh.xnode()) > mesh.Ly() / 2) {
+			if (mesh.y(np) <= mesh.yb() + mesh.Ly() / 2) {
+				if (mesh.y(np + mesh.xnode()) > mesh.yb() + mesh.Ly() / 2) {
 					ghiav.push_back(V[np][1]);//x軸上でのy方向流速
 					ghiax.push_back(mesh.x(np));//対応するx軸座標
 				}
