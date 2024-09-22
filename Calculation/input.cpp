@@ -18,6 +18,8 @@ InputData::InputData()
 	input_param();
 	input_csv();
 	//input_mesh();
+	cout << "input data: dx->" << nparam.getDx() << " " << " dy->" << nparam.getDy() << endl;
+	cout << "recomend time increments:  dt < " << recomend_dt() << endl;
 }
 vector<double> InputData::getUx() {
 	return Ux;
@@ -429,7 +431,28 @@ void InputData::input_csv() {
 		nbool3[ie][3] = e4[ie];
 	}
 }
+double InputData::recomend_dt() {
+	vector<double> magnitude;
+	magnitude.resize(nparam.getNnode());
+	for (int i = 0; i < magnitude.size(); i++) {
+		magnitude[i] = sqrt(Ux[i] * Ux[i] + Uy[i] * Uy[i]);
+	}
+	double max = magnitude[0];
+	for (int i = 0; i < magnitude.size(); i++) {
+		if (magnitude[i] < max) {
+			max = magnitude[i];
+		}
+	}
+	double dx = nparam.getDx();
+	double dy = nparam.getDy();
+	double dr = sqrt(dx * dx + dy * dy);
+	double courant = 0.01;//クーラン数 C=u*dt/dr
+	double dt = 0.0;
+	dt = dr * courant / max;
 
+	return dt;
+
+}
 string InputData::get_path() {
 	return goalpath;
 }
