@@ -231,7 +231,7 @@ void Mesh2d::generate() {
 				ncond_[np] = Bcond_.getBCflagR();
 			}
 			else if (j == ynode_ - 1) {//上壁面
-				ncond_[np] = Bcond_.getBCflagR();
+				ncond_[np] = Bcond_.getBCflagU();
 			}
 			else {//それ以外の領域
 				ncond_[np] = 0;
@@ -616,7 +616,6 @@ void BackstepMesh2d::generate() {
 		}
 	}
 
-
 	for (int j = 0; j < ynode_; j++) {
 		for (int i = 0; i < xnode_; i++) {
 			int np = i + xnode_ * j;
@@ -649,14 +648,14 @@ void BackstepMesh2d::generate() {
 					ncond_[np] = Bcond_.getBCflagR();
 				}
 			}
-			
+
 		}
 	}
 
 	for (int j = 0; j < ynode_; j++) {
 		for (int i = 0; i < xnode_; i++) {
 			int np = i + xnode_ * j;
-			if (x(np) <= (hx + xb_)&& y(np) <= (hy + yb_)) {
+			if (x(np) <= (hx + xb_) && y(np) <= (hy + yb_)) {
 				//段差の部分を探る
 				ncond_[np] = 1;//剛体内部
 				if (x(np + 1) > (hx + xb_)) {
@@ -820,6 +819,7 @@ void SquarePillarMesh2d::generate() {
 	for (int j = 0; j < ynode_; j++) {
 		for (int i = 0; i < xnode_; i++) {
 			int np = i + xnode_ * j;
+
 			if (i != 0 || i != xnode_ - 1) {
 				if (j != 0 || j != ynode_ - 1) {
 					if (((x(np) >= (ox - hx)) && (y(np) >= (oy - hy)))

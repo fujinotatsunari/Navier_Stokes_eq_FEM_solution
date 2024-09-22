@@ -152,7 +152,7 @@ void OutputData::output_csv() {
 	
 	for (int j = 0; j < mesh.ynode(); j++) {
 		for (int i = 0; i < mesh.xnode(); i++) {
-			int np = i + mesh.ynode() * j;
+			int np = i + mesh.xnode() * j;
 			outputfile1 << V[np][0] << ",";
 		}
 		outputfile1 << "\n";
@@ -161,7 +161,7 @@ void OutputData::output_csv() {
 
 	for (int j = 0; j < mesh.ynode(); j++) {
 		for (int i = 0; i < mesh.xnode(); i++) {
-			int np = i + mesh.ynode() * j;
+			int np = i + mesh.xnode() * j;
 			outputfile2 << V[np][1] << ",";
 		}
 		outputfile2 << "\n";
@@ -171,7 +171,7 @@ void OutputData::output_csv() {
 
 	for (int j = 0; j < mesh.yelem(); j++) {
 		for (int i = 0; i < mesh.xelem(); i++) {
-			int ie = i + mesh.yelem() * j;
+			int ie = i + mesh.xelem() * j;
 			outputfile3 << P[ie].v() << ",";
 		}
 		outputfile3 << "\n";
@@ -182,7 +182,7 @@ void OutputData::output_csv() {
 
 	for (int j = 0; j < mesh.ynode(); j++) {
 		for (int i = 0; i < mesh.xnode(); i++) {
-			int np = i + mesh.ynode() * j;
+			int np = i + mesh.xnode() * j;
 			outputfile4 << mesh.ncond(np) << ",";
 		}
 		outputfile4 << "\n";
@@ -191,7 +191,7 @@ void OutputData::output_csv() {
 
 	for (int j = 0; j < mesh.yelem(); j++) {
 		for (int i = 0; i < mesh.xelem(); i++) {
-			int ie = i + mesh.yelem() * j;
+			int ie = i + mesh.xelem() * j;
 			outputfile5 << mesh.scond(ie) << ",";
 		}
 		outputfile5 << "\n";
