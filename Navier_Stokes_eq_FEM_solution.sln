@@ -9,38 +9,60 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Mesh_generate", "Mesh_gener
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Calculation", "Calculation\Calculation.vcxproj", "{DA2DD2E9-EE40-4778-BE75-34E9D3B7AFCE}"
 EndProject
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "2d_flow_viewer", "2d_flow_viewer\2d_flow_viewer.pyproj", "{A3E88176-2615-4FBE-ABC0-67B56ED2DA85}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
 		Debug|x64 = Debug|x64
 		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6C36CD55-670E-4195-AE61-C42BE302FAE9}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{6C36CD55-670E-4195-AE61-C42BE302FAE9}.Debug|Any CPU.Build.0 = Debug|x64
 		{6C36CD55-670E-4195-AE61-C42BE302FAE9}.Debug|x64.ActiveCfg = Debug|x64
 		{6C36CD55-670E-4195-AE61-C42BE302FAE9}.Debug|x64.Build.0 = Debug|x64
 		{6C36CD55-670E-4195-AE61-C42BE302FAE9}.Debug|x86.ActiveCfg = Debug|Win32
 		{6C36CD55-670E-4195-AE61-C42BE302FAE9}.Debug|x86.Build.0 = Debug|Win32
+		{6C36CD55-670E-4195-AE61-C42BE302FAE9}.Release|Any CPU.ActiveCfg = Release|x64
+		{6C36CD55-670E-4195-AE61-C42BE302FAE9}.Release|Any CPU.Build.0 = Release|x64
 		{6C36CD55-670E-4195-AE61-C42BE302FAE9}.Release|x64.ActiveCfg = Release|x64
 		{6C36CD55-670E-4195-AE61-C42BE302FAE9}.Release|x64.Build.0 = Release|x64
 		{6C36CD55-670E-4195-AE61-C42BE302FAE9}.Release|x86.ActiveCfg = Release|Win32
 		{6C36CD55-670E-4195-AE61-C42BE302FAE9}.Release|x86.Build.0 = Release|Win32
+		{A585682D-0111-46C1-ABF8-7EBDD1F6908C}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{A585682D-0111-46C1-ABF8-7EBDD1F6908C}.Debug|Any CPU.Build.0 = Debug|x64
 		{A585682D-0111-46C1-ABF8-7EBDD1F6908C}.Debug|x64.ActiveCfg = Debug|x64
 		{A585682D-0111-46C1-ABF8-7EBDD1F6908C}.Debug|x64.Build.0 = Debug|x64
 		{A585682D-0111-46C1-ABF8-7EBDD1F6908C}.Debug|x86.ActiveCfg = Debug|Win32
 		{A585682D-0111-46C1-ABF8-7EBDD1F6908C}.Debug|x86.Build.0 = Debug|Win32
+		{A585682D-0111-46C1-ABF8-7EBDD1F6908C}.Release|Any CPU.ActiveCfg = Release|x64
+		{A585682D-0111-46C1-ABF8-7EBDD1F6908C}.Release|Any CPU.Build.0 = Release|x64
 		{A585682D-0111-46C1-ABF8-7EBDD1F6908C}.Release|x64.ActiveCfg = Release|x64
 		{A585682D-0111-46C1-ABF8-7EBDD1F6908C}.Release|x64.Build.0 = Release|x64
 		{A585682D-0111-46C1-ABF8-7EBDD1F6908C}.Release|x86.ActiveCfg = Release|Win32
 		{A585682D-0111-46C1-ABF8-7EBDD1F6908C}.Release|x86.Build.0 = Release|Win32
+		{DA2DD2E9-EE40-4778-BE75-34E9D3B7AFCE}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{DA2DD2E9-EE40-4778-BE75-34E9D3B7AFCE}.Debug|Any CPU.Build.0 = Debug|x64
 		{DA2DD2E9-EE40-4778-BE75-34E9D3B7AFCE}.Debug|x64.ActiveCfg = Debug|x64
 		{DA2DD2E9-EE40-4778-BE75-34E9D3B7AFCE}.Debug|x64.Build.0 = Debug|x64
 		{DA2DD2E9-EE40-4778-BE75-34E9D3B7AFCE}.Debug|x86.ActiveCfg = Debug|Win32
 		{DA2DD2E9-EE40-4778-BE75-34E9D3B7AFCE}.Debug|x86.Build.0 = Debug|Win32
+		{DA2DD2E9-EE40-4778-BE75-34E9D3B7AFCE}.Release|Any CPU.ActiveCfg = Release|x64
+		{DA2DD2E9-EE40-4778-BE75-34E9D3B7AFCE}.Release|Any CPU.Build.0 = Release|x64
 		{DA2DD2E9-EE40-4778-BE75-34E9D3B7AFCE}.Release|x64.ActiveCfg = Release|x64
 		{DA2DD2E9-EE40-4778-BE75-34E9D3B7AFCE}.Release|x64.Build.0 = Release|x64
 		{DA2DD2E9-EE40-4778-BE75-34E9D3B7AFCE}.Release|x86.ActiveCfg = Release|Win32
 		{DA2DD2E9-EE40-4778-BE75-34E9D3B7AFCE}.Release|x86.Build.0 = Release|Win32
+		{A3E88176-2615-4FBE-ABC0-67B56ED2DA85}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3E88176-2615-4FBE-ABC0-67B56ED2DA85}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A3E88176-2615-4FBE-ABC0-67B56ED2DA85}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A3E88176-2615-4FBE-ABC0-67B56ED2DA85}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3E88176-2615-4FBE-ABC0-67B56ED2DA85}.Release|x64.ActiveCfg = Release|Any CPU
+		{A3E88176-2615-4FBE-ABC0-67B56ED2DA85}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
