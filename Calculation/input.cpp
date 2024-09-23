@@ -18,6 +18,8 @@ InputData::InputData()
 	input_param();
 	input_csv();
 	//input_mesh();
+	cout << "input data: dx->" << nparam.getDx() << " " << " dy->" << nparam.getDy() << endl;
+	cout << "recomend time increments:  dt < " << recomend_dt() << endl;
 }
 vector<double> InputData::getUx() {
 	return Ux;
@@ -127,6 +129,15 @@ void InputData::setgoal() {
 	}
 	else {
 		
+	}
+
+	goalpath2 = datapath + "/" + goal2;
+	if (stat(goalpath2.c_str(), &statBuf) != 0) {
+		cout << goalpath2 << "は存在しません" << endl;
+		exit(-1);
+	}
+	else {
+
 	}
 }
 void InputData::input_param() {
@@ -268,18 +279,18 @@ void InputData::input_csv() {
 	
 	int count = 0;
 	//1ファイル1配列
-	string filename1 = goalpath + "/" + "P.csv";//圧力
-	string filename2 = goalpath + "/" + "U.csv";//流速x
-	string filename3 = goalpath + "/" + "V.csv";//流速y
-	string filename4 = goalpath + "/" + "ncond.csv";//境界条件
-	string filename5 = goalpath + "/" + "scond.csv";//要素フラグ
+	string filename1 = goalpath2 + "/" + "P.dat";//圧力
+	string filename2 = goalpath2 + "/" + "U.dat";//流速x
+	string filename3 = goalpath2 + "/" + "V.dat";//流速y
+	string filename4 = goalpath2 + "/" + "ncond.dat";//境界条件
+	string filename5 = goalpath2 + "/" + "scond.dat";//要素フラグ
 	
 	//1ファイル2配列
-	string filename6 = goalpath + "/" + "node.csv";//節点座標
-	string filename7 = goalpath + "/" + "snode.csv";//重心座標
+	string filename6 = goalpath2 + "/" + "node.dat";//節点座標
+	string filename7 = goalpath2 + "/" + "snode.dat";//重心座標
 	//1ファイル4配列
-	string filename8 = goalpath + "/" + "nbool1.csv";//nbool1
-	string filename9 = goalpath + "/" + "nbool3.csv";//nbool3
+	string filename8 = goalpath2 + "/" + "nbool1.dat";//nbool1
+	string filename9 = goalpath2 + "/" + "nbool3.dat";//nbool3
 	
 	vector<string> filenames1 = { filename1,filename2,filename3,filename4 ,filename5 };
 	vector<string> filenames2 = { filename6,filename7 };
@@ -300,27 +311,27 @@ void InputData::input_csv() {
 			}
 			//この時点でファイル終端に達する(vには１ファイルのすべてのデータがある)
 
-			if (count == 0) {//1ファイル目P.csv
+			if (count == 0) {//1ファイル目P.dat
 				for (int i = 0; i < v.size(); i++) {
 					P.push_back(stod(v[i]));
 				}
 			}
-			if (count == 1) {//2ファイル目U.csv
+			if (count == 1) {//2ファイル目U.dat
 				for (int i = 0; i < v.size(); i++) {
 					Ux.push_back(stod(v[i]));
 				}
 			}
-			if (count == 2) {//3ファイル目V.csv
+			if (count == 2) {//3ファイル目V.dat
 				for (int i = 0; i < v.size(); i++) {
 					Uy.push_back(stod(v[i]));
 				}
 			}
-			if (count == 3) {//4ファイル目ncond.csv
+			if (count == 3) {//4ファイル目ncond.dat
 				for (int i = 0; i < v.size(); i++) {
 					cond.push_back(stoi(v[i]));
 				}
 			}
-			if (count == 4) {//4ファイル目scond.csv
+			if (count == 4) {//4ファイル目scond.dat
 				for (int i = 0; i < v.size(); i++) {
 					scond.push_back(stoi(v[i]));
 				}
@@ -347,11 +358,11 @@ void InputData::input_csv() {
 				while (getline(ss, value, ',')) {
 					v.push_back(value);
 				}
-				if (count == 0) {//1ファイル目node.csv
+				if (count == 0) {//1ファイル目node.dat
 					x.push_back(stod(v[0]));
 					y.push_back(stod(v[1]));
 				}
-				if (count == 1) {//2ファイル目snode.csv
+				if (count == 1) {//2ファイル目snode.dat
 					ex.push_back(stod(v[0]));
 					ey.push_back(stod(v[1]));
 				}
@@ -378,13 +389,13 @@ void InputData::input_csv() {
 				while (getline(ss, value, ',')) {
 					v.push_back(value);
 				}
-				if (count == 0) {//1ファイル目nbool1.csv
+				if (count == 0) {//1ファイル目nbool1.dat
 					i1.push_back(stoi(v[0]));
 					i2.push_back(stoi(v[1]));
 					i3.push_back(stoi(v[2]));
 					i4.push_back(stoi(v[3]));
 				}
-				if (count == 1) {//2ファイル目nbool3.csv
+				if (count == 1) {//2ファイル目nbool3.dat
 					e1.push_back(stoi(v[0]));
 					e2.push_back(stoi(v[1]));
 					e3.push_back(stoi(v[2]));
@@ -420,7 +431,28 @@ void InputData::input_csv() {
 		nbool3[ie][3] = e4[ie];
 	}
 }
+double InputData::recomend_dt() {
+	vector<double> magnitude;
+	magnitude.resize(nparam.getNnode());
+	for (int i = 0; i < magnitude.size(); i++) {
+		magnitude[i] = sqrt(Ux[i] * Ux[i] + Uy[i] * Uy[i]);
+	}
+	double max = magnitude[0];
+	for (int i = 0; i < magnitude.size(); i++) {
+		if (magnitude[i] < max) {
+			max = magnitude[i];
+		}
+	}
+	double dx = nparam.getDx();
+	double dy = nparam.getDy();
+	double dr = sqrt(dx * dx + dy * dy);
+	double courant = 0.01;//クーラン数 C=u*dt/dr
+	double dt = 0.0;
+	dt = dr * courant / max;
 
+	return dt;
+
+}
 string InputData::get_path() {
 	return goalpath;
 }

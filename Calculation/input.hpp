@@ -14,8 +14,10 @@ private:
 	string datepath;//dateのパス
 	string data;//data_nフォルダのなまえ
 	string datapath;//dataのパス
-	string goal = "mesh_data_box";//目的フォルダ
-	string goalpath;//目的フォルダのパス
+	string goal = "mesh_data_box";//目的フォルダ1
+	string goal2 = "data_box";//目的フォルダ2
+	string goalpath;//目的フォルダ1のパス
+	string goalpath2;//目的フォルダ2のパス
 	vector<double> Ux;
 	vector<double> Uy;
 	vector<double> P;
@@ -56,6 +58,10 @@ public:
 	void input_param();
 	void input_csv();
 	void input_mesh();
+
+	double recomend_dt();//時間刻み幅の推奨
+	//初期条件の流速の大きさの最大値からクーラン数が
+	// C=0.01より小さくなるような時間刻み幅を提示する
 	//void intput_data();
 	//nboolのゲッタ
 	vector<vector<int>> getnbool1();
