@@ -78,7 +78,36 @@ public:
 
 };
 
+/*
 //作るやつ
 //完全陰解法+直接法+人工圧縮性法 FID-ACmethod
+class FIDAC {
+private:	
+	Velocity2d& V;
+	Pressure& P;
+	Time& t;
+	Mesh2d& mesh;
+	NDNSparam& nsparam;
+	SORparam& sorparam;
+	Boundarycond& BC;
+	InputData& input;
+};
 //半陰解法(移流項の線形化)+直接法+人工圧縮性法 SID-ACmehtod
+class LIDAC {
+private:
+	Velocity2d& V;
+	Pressure& P;
+	Time& t;
+	Mesh2d& mesh;
+	NDNSparam& nsparam;
+	SORparam& sorparam;
+	Boundarycond& BC;
+	InputData& input;
+	//必要そうなもの
+	//大規模行列　
+};
 //SIMPLER法(burgers+poisson分離陰解法)
+class SIMPLER {
+
+};
+*/
