@@ -439,12 +439,14 @@ double InputData::recomend_dt() {
 	}
 	double max = magnitude[0];
 	for (int i = 0; i < magnitude.size(); i++) {
-		if (magnitude[i] < max) {
+		if (magnitude[i] > max) {
 			max = magnitude[i];
 		}
 	}
+	
 	double dx = nparam.getDx();
 	double dy = nparam.getDy();
+	
 	double dr = sqrt(dx * dx + dy * dy);
 	double courant = 0.01;//クーラン数 C=u*dt/dr
 	double dt = 0.0;

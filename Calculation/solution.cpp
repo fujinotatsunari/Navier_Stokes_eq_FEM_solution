@@ -438,7 +438,7 @@ void SOR::do_calculation(Velocity2d& v, Pressure& p, Time& T, Mesh2d& Mesh, SORp
 		div_max = div.max_div();//発散量の最大値を計算
 
 		nor++;//反復回数の更新
-	} while ((div_max > 1.0e-5) && (nor < 500));
+	} while ((div_max > param.get_eps()) && (nor < param.get_nmax()));
 }
 int SOR::get_nor() {
 	return nor;
@@ -460,7 +460,9 @@ void HSMAC_FEM::do_solution() {
 	output.set_path(input.getgoal());
 	output.set_Filestage(0);
 
-
+	int ndisplay;
+	cout << "Terminal display step ->";
+	cin >> ndisplay;
 	//時間進行の開始
 	cout << "End of setting up initial condition" << endl;
 	cout << "scheme:  HSMAC FEM" << endl;
@@ -491,6 +493,7 @@ void HSMAC_FEM::do_solution() {
 		
 		auto step_end = std::chrono::high_resolution_clock::now();    // 1step終了時刻を取得
 		if (n % t.nsample() == 0) {//ステップ数が出力ステップ数のとき
+			cout << "Files Output Step" << "\n";
 			view_parameters(n);//計算パラメータの表示
 			auto step_duration = std::chrono::duration_cast<std::chrono::seconds>(step_end - step_start);  // 1step計算時間を秒に変換
 			auto step_duration_sum = std::chrono::duration_cast<std::chrono::seconds>(step_end - start);  // 累計計算時間を秒に変換
@@ -501,6 +504,16 @@ void HSMAC_FEM::do_solution() {
 			if (output.get_model() == "cavity") {
 				output.output_ghia(n);
 			}
+			cout << "\n";
+			cout << "\n";
+		}
+		if (n % ndisplay == 0) {//ステップ数が端末表示ステップのとき
+			cout << "Display Step" << "\n";
+			view_parameters(n);//計算パラメータの表示
+			auto step_duration = std::chrono::duration_cast<std::chrono::seconds>(step_end - step_start);  // 1step計算時間を秒に変換
+			auto step_duration_sum = std::chrono::duration_cast<std::chrono::seconds>(step_end - start);  // 累計計算時間を秒に変換
+			cout << "Step No." << n << " :calculation time : " << step_duration.count() << " s" << endl;
+			cout << "Cumulative caluculation time: " << step_duration_sum.count() << " s" << endl;
 			cout << "\n";
 			cout << "\n";
 		}
