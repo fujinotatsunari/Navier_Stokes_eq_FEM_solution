@@ -78,6 +78,16 @@ const Scalar2d& ScalarField2d::operator[](int i)const {
 Scalar2d& ScalarField2d::operator[](int i) {
 	return scalar[i];
 }
+
+ScalarField2d& ScalarField2d::operator=(const ScalarField2d& S) {
+	size = S.size;
+	mesh = S.mesh;
+	Bcond = S.Bcond;
+	scalar = S.scalar;
+
+	return *this;
+}
+
 Vector2d::Vector2d() :x(0),y(0){}
 Vector2d::Vector2d(double X,double Y):x(X),y(Y){}
 Vector2d::Vector2d(const Vector2d& V) {
@@ -204,7 +214,59 @@ void Pressure::input(InputData& input) {
 		scalar[ie] = input.getP()[ie];
 	}
 }
+Pressure Pressure::nodeP() {
+	Pressure nodeP(mesh, Bcond);
+	nodeP.scalar.resize(mesh.nnode());
 
+	//圧力は要素内中心で定義され　要素内一定となる
+	//節点値圧力を求めるために 要素ごとに節点に圧力を足し込んでいき
+	//最後に平均する
+
+	int node = 4;//要素内節点数
+	for (int j = 0; j < node; j++) {//節点ループ
+		for (int ie = 0; ie < mesh.nelem(); ie++) {
+			int np = mesh.nbool1(ie, j);
+			int i1 = mesh.i1(ie);
+			int i2 = mesh.i2(ie);
+			int i3 = mesh.i3(ie);
+			int i4 = mesh.i4(ie);
+
+			nodeP[np][0] = nodeP[np][0] + scalar[ie].v();//圧力の節点への足し込み
+		}
+	}
+	for (int j = 0; j < mesh.ynode(); j++) {
+		for (int i = 0; i < mesh.xnode(); i++) {
+			int np = i + mesh.xnode() * j;
+			if (i == 0 || i == mesh.xnode() - 1 || j == 0 || j == mesh.ynode() - 1) {
+				if (i == 0) {//左壁面
+					if (j != 0 && j != mesh.ynode() - 1) {//角を除く壁面
+						nodeP[np][0] = nodeP[np][0] / 2.0;
+					}
+				}
+				if (i == mesh.xnode() - 1) {//右壁面
+					if (j != 0 && j != mesh.ynode() - 1) {//角を除く壁面
+						nodeP[np][0] = nodeP[np][0] / 2.0;
+					}
+				}
+				if (j == 0) {//下壁面
+					if (i != 0 && i != mesh.xnode() - 1) {//角を除く壁面
+						nodeP[np][0] = nodeP[np][0] / 2.0;
+					}
+				}
+				if (j == mesh.ynode() - 1) {//上壁面
+					if (i != 0 && i != mesh.xnode() - 1) {//角を除く壁面
+						nodeP[np][0] = nodeP[np][0] / 2.0;
+					}
+				}
+			}
+			else {//内部
+				nodeP[np][0] = nodeP[np][0] / 4.0;
+			}
+
+		}
+	}
+	return nodeP;
+}
 Velocity2d::Velocity2d(Mesh2d& Mesh, Boundarycond& BC) 
 	:VectorField2d(Mesh, BC), nnode(Mesh.nnode())
 {

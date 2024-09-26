@@ -35,7 +35,8 @@ string make_directories(string str1, string str2) {
 OutputData::OutputData(Mesh2d& Mesh, Time& T, Boundarycond& Bc, Velocity2d& v, Pressure& p, NDNSparam& Param)
 	:mesh(Mesh),t(T), BC(Bc),V(v),P(p), Filestage(0),param(Param)
 {
-
+	directory_setup();//オブジェクト生成時　ディレクトリを生成 dirが決まる
+	Filestage = 1;
 }
 void OutputData::set_Filestage(int filestage) {
 	Filestage = filestage;
@@ -118,38 +119,50 @@ string OutputData::directory_setup() {
 }
 void OutputData::output_time_csv(int N) {
 
+	ScalarField2d nodeP(mesh, BC);
+	
+	for (int i = 0; i < mesh.nnode(); i++) {
+		nodeP[i] = P.nodeP()[i];
+	}
+
+
 	string dirU = "U";
 	string dirV = "V";
 	string dirP = "P";
+	
 	string dirMagnitude = "Magnitude";
+	string dirNP = "Pnode";//圧力の節点値dir
 
 	string filename1;//U_n.csv
 	string filename2;//V_n.csv
-	string filename3;//P.csv
+	string filename3;//P_n.csv
 	string filename4;//magnitude_n.csv
+	string filename5;//Pnode_n.csv
 
 	string str1;
 	string str2;
 	string str3;
-	string pathU, pathV, pathP, pathMagnitude;
+	string pathU, pathV, pathP, pathMagnitude, pathPnode;
 	
-	str1 = directory_setup();
+	str1 = dir;
 	//str1 = directories_setup(n, scheme);//C:///.../data_(n)
 
 	pathU = make_directories(str1, dirU);
 	pathV = make_directories(str1, dirV);
 	pathP = make_directories(str1, dirP);
 	pathMagnitude = make_directories(str1, dirMagnitude);
-
+	pathPnode = make_directories(str1, dirNP);
 
 	filename1 = pathU+ "/" + "U_" + to_string(N) + ".csv";
 	filename2 = pathV + "/" + "V_" + to_string(N) + ".csv";
 	filename3 = pathP + "/" + "P_" + to_string(N) + ".csv";
 	filename4 = pathMagnitude + "/" + "magnitude_" + to_string(N) + ".csv";
+	filename5 = pathPnode + "/" + "Pnode_" + to_string(N) + ".csv";
 	ofstream outputfile1(filename1);
 	ofstream outputfile2(filename2);
 	ofstream outputfile3(filename3);
 	ofstream outputfile4(filename4);
+	ofstream outputfile5(filename5);
 
 
 	for (int j = 0; j < mesh.ynode(); j++) {
@@ -158,10 +171,12 @@ void OutputData::output_time_csv(int N) {
 			outputfile1 << V[np][0] << ",";
 			outputfile2 << V[np][1] << ",";
 			outputfile4 << V[np].norm() << ",";
+			outputfile5 << nodeP[np].v() << ",";
 		}
 		outputfile1 << "\n";
 		outputfile2 << "\n";
 		outputfile4 << "\n";
+		outputfile5 << "\n";
 	}
 
 	for (int j = 0; j < mesh.yelem(); j++) {
@@ -176,6 +191,7 @@ void OutputData::output_time_csv(int N) {
 	outputfile2.close();
 	outputfile3.close();
 	outputfile4.close();
+	outputfile5.close();
 }
 
 void OutputData::output_csv() {
@@ -198,7 +214,7 @@ void OutputData::output_ghia(int N) {
 	string pathG;
 	get_ghia();
 
-	str1 = directory_setup();
+	str1 = dir;
 	pathG = make_directories(str1, dirG);
 	filename1 = pathG + "/" + "Ghiax_" + to_string(N) + ".csv";
 	filename2 = pathG + "/" + "Ghiay_" + to_string(N) + ".csv";
@@ -224,7 +240,7 @@ void OutputData::output_condition() {
 	string str1;
 	string str2;
 	string str3;
-	str1 = directory_setup();//C:///.../data_(i)
+	str1 = dir;
 	str2 = "condition";
 	str3 = make_directories(str1, str2);//C:/..../data_(i)/condition
 	str = str3 + "/" + "condition.txt";
