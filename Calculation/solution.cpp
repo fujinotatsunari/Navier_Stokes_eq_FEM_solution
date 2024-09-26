@@ -455,10 +455,10 @@ void HSMAC_FEM::do_solution() {
 	Predictor Vp;//流速予測子計算オブジェクト
 	SOR S(sorparam);//同時緩和法計算オブジェクト
 	OutputData output(mesh, t, BC, V, P, nsparam);//出力用オブジェクト
+
 	output.set_scheme("HSMAC");
 	output.set_model(input.get_modelname());
 	output.set_path(input.getgoal());
-	output.set_Filestage(0);
 
 	int ndisplay;
 	cout << "Terminal display step ->";

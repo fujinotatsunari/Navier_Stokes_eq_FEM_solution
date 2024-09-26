@@ -38,9 +38,9 @@ protected:
 
 public:
 	ScalarField2d(Mesh2d& Mesh, Boundarycond& BC);
-
 	const Scalar2d& operator[](int i)const;
 	Scalar2d& operator[](int i);
+	ScalarField2d& operator=(const ScalarField2d& S);
 };
 
 class Vector2d {
@@ -86,6 +86,7 @@ private:
 public:
 	Pressure(Mesh2d& mesh, Boundarycond& BC);
 	void input(InputData& input);
+	Pressure nodeP();//圧力節点値の取得
 	//void init();//初期化
 	//void cavity_init();//キャビティ流れの初期化(圧力編)
 	//void backstep_init();//バックステップ流れの初期化
