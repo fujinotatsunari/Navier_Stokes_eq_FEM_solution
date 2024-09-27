@@ -35,8 +35,8 @@ string make_directories(string str1, string str2) {
 OutputData::OutputData(Mesh2d& Mesh, Time& T, Boundarycond& Bc, Velocity2d& v, Pressure& p, NDNSparam& Param)
 	:mesh(Mesh),t(T), BC(Bc),V(v),P(p), Filestage(0),param(Param)
 {
-	directory_setup();//オブジェクト生成時　ディレクトリを生成 dirが決まる
-	Filestage = 1;
+	//directory_setup();//オブジェクト生成時　ディレクトリを生成 dirが決まる
+	//Filestage = 1;
 }
 void OutputData::set_Filestage(int filestage) {
 	Filestage = filestage;
@@ -59,6 +59,12 @@ int OutputData::get_Filestage() {
 string OutputData::get_dir() {
 	return dir;
 }
+void OutputData::output_setup(string Scheme, string Model, string Path) {
+	set_scheme(Scheme);
+	set_model(Model);
+	set_path(Path);
+	dir = directory_setup();
+}
 
 string OutputData::directory_setup() {
 	string dirname0 = "C:";
@@ -79,8 +85,8 @@ string OutputData::directory_setup() {
 	localtime_s(&local_time, &timer);
 	struct stat statBuf;
 
-	str = make_directories(make_directories(make_directories(make_directories(dirname0, dirname1), dirname2), dirname3), dirname4);
-
+	
+	str = make_directories(str = make_directories(make_directories(make_directories(make_directories(dirname0, dirname1), dirname2), dirname3), dirname4), dirname5);
 	year = to_string(local_time.tm_year + 1900);
 	month = to_string(local_time.tm_mon + 1);
 	day = to_string(local_time.tm_mday);
@@ -99,7 +105,7 @@ string OutputData::directory_setup() {
 				str = make_directories(str, str1);
 				//cout << str << "を作成" <<  endl;
 				check = 1;
-				dir = str;
+				//dir = str;
 				Filestage = 1;
 				return str;
 			}
@@ -121,9 +127,7 @@ void OutputData::output_time_csv(int N) {
 
 	ScalarField2d nodeP(mesh, BC);
 	
-	for (int i = 0; i < mesh.nnode(); i++) {
-		nodeP[i] = P.nodeP()[i];
-	}
+	nodeP = P.nodeP();
 
 
 	string dirU = "U";

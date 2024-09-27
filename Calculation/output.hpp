@@ -37,7 +37,7 @@ public:
 	int get_Filestage();
 	string get_dir();
 	string directory_setup();//下におけるdata_nを返す
-
+	void output_setup(string Scheme, string Model, string Path);
 
 	/*
 	* C:/Result/2d_Navier_Stokes_eq/calculation/model/scheme/date/data_n

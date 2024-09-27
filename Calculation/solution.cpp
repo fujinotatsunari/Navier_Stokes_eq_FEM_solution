@@ -456,9 +456,8 @@ void HSMAC_FEM::do_solution() {
 	SOR S(sorparam);//同時緩和法計算オブジェクト
 	OutputData output(mesh, t, BC, V, P, nsparam);//出力用オブジェクト
 
-	output.set_scheme("HSMAC");
-	output.set_model(input.get_modelname());
-	output.set_path(input.getgoal());
+	output.output_setup("HSMAC", input.get_modelname(), input.getgoal());
+
 
 	int ndisplay;
 	cout << "Terminal display step ->";
