@@ -64,8 +64,16 @@ void Time::setup() {
 	}
 }
 double Time::ntime(int n) {
+	n_ = n;
 	ntime_ = 0.0 + (double)n * dt_;
 	return ntime_;
+}
+double Time::ntime() {
+	ntime_ = 0.0 + (double)n_ * dt_;
+	return ntime_;
+}
+void Time::setn(int n) {
+	n_ = n;
 }
 double Time::dt() {
 	return dt_;

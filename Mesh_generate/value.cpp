@@ -220,6 +220,7 @@ void Velocity2d::init() {
 
 		}
 	}
+
 }
 void Velocity2d::cavity_init() {
 	init();
@@ -235,26 +236,68 @@ void Velocity2d::cavity_init() {
 }
 void Velocity2d::backstep_init() {
 	init();
-	Vector2d V(1.0, 0.0);
+	/*
+	std::vector<double> inlet;//流入領域
+	double y0b, y0t, y0L, y0;//流入下端,上端,流入領域長さ,領域中点
+
+	for (int j = 0; j < mesh.ynode(); j++) {
+		for (int i = 0; i < mesh.xnode(); i++) {
+			int np = i + mesh.xnode() * j;
+			if (mesh.ncond(np) == 2) {//2:流入壁面
+				inlet.push_back(mesh.y(np));
+			}
+		}
+	}
+	y0b = inlet[0];
+	y0t = inlet.back();
+	y0L = y0t - y0b;
+	y0 = (y0b + y0t) / 2;
+	double C = y0b * y0b - 2 * y0b * y0 + y0 * y0;
+	//ポアズイユ流れの流入条件
+	//u = -0.5/C (y-y0)^2 + 0.5
 	for (int j = 0; j < mesh.ynode(); j++) {
 		for (int i = 0; i < mesh.xnode(); i++) {
 			int np = i + mesh.xnode() * j;
 			if (mesh.ncond(np) == 2) {//2:流入壁面(壁面法線方向に流速固定値1)
+				double u = (-0.5 / C) * (mesh.y(np) - y0) * (mesh.y(np) - y0) + 0.5;
+				Vector2d V(u, 0);
 				vector[np] = V;
 			}
 		}
 	}
+	*/
 }
 void Velocity2d::Pillar_init() {
 	init();
-	Vector2d V(1.0, 0.0);
+	/*
+	std::vector<double> inlet;//流入領域
+	double y0b, y0t, y0L, y0;//流入下端,上端,流入領域長さ,領域中点
+
+	for (int j = 0; j < mesh.ynode(); j++) {
+		for (int i = 0; i < mesh.xnode(); i++) {
+			int np = i + mesh.xnode() * j;
+			if (mesh.ncond(np) == 2) {//2:流入壁面
+				inlet.push_back(mesh.y(np));
+			}
+		}
+	}
+	y0b = inlet[0];
+	y0t = inlet.back();
+	y0L = y0t - y0b;
+	y0 = (y0b + y0t) / 2;
+	double C = y0b * y0b - 2 * y0b * y0 + y0 * y0;
+	//ポアズイユ流れの流入条件
+	//u = -0.5/C (y-y0)^2 + 0.5
 	for (int j = 0; j < mesh.ynode(); j++) {
 		for (int i = 0; i < mesh.xnode(); i++) {
 			int np = i + mesh.xnode() * j;
 			if (mesh.ncond(np) == 2) {//2:流入壁面(壁面法線方向に流速固定値1)
+				double u = (-0.5 / C) * (mesh.y(np) - y0) * (mesh.y(np) - y0) + 0.5;
+				Vector2d V(u, 0);
 				vector[np] = V;
 			}
 		}
 	}
+	*/
 }
 

@@ -9,7 +9,8 @@
 #include<chrono>
 #include<vector>
 #include<iostream>
-
+#include<cmath>
+#define PI 3.14159265359
 using namespace std;
 
 Divergence::Divergence(Mesh2d& Mesh,Boundarycond& BC)//発散量
@@ -126,14 +127,35 @@ void Predictor::euler_explicit(Velocity2d& v, Pressure& p, Time& T, Mesh2d& Mesh
 	vector<Vector2d> UB;
 	UB.resize(Mesh.nnode());//速度場の1step前の値
 
-	vector<int> nx;//境界上の法線フラグx方向
-	nx.resize(Mesh.nnode());
-	vector<int> ny;//境界上の法線フラグy方向
-	ny.resize(Mesh.nnode());
+
 	//領域外側を指す方向の法線
 	//0:内部 正:壁面が面する方向が正(x,y) 負:壁面が面する方向が負(x,y)
 	//障害物を指す方向の法線
 	//0:内部 正:壁面が面する方向が負(x,y) 負:壁面が面する方向が正(x,y)
+	vector<int> nx;//境界上の法線フラグx方向
+	nx.resize(Mesh.nnode());
+	vector<int> ny;//境界上の法線フラグy方向
+	ny.resize(Mesh.nnode());
+	
+
+	//流入境界での処理
+	std::vector<double> inlet;//流入領域
+	double y0b, y0t, y0L, y0;//流入下端,上端,流入領域長さ,領域中点
+
+	for (int j = 0; j < Mesh.ynode(); j++) {
+		for (int i = 0; i < Mesh.xnode(); i++) {
+			int np = i + Mesh.xnode() * j;
+			if (Mesh.ncond(np) == 2) {//2:流入壁面
+				inlet.push_back(Mesh.y(np));
+			}
+		}
+	}
+	y0b = inlet[0];
+	y0t = inlet.back();
+	y0L = y0t - y0b;
+	y0 = (y0b + y0t) / 2;
+	double C = y0b * y0b - 2 * y0b * y0 + y0 * y0;
+	
 	for (int ie = 0; ie < Mesh.nelem(); ie++) {
 
 		int i1 = Mesh.i1(ie);
@@ -223,8 +245,22 @@ void Predictor::euler_explicit(Velocity2d& v, Pressure& p, Time& T, Mesh2d& Mesh
 			v[i] = c;
 		}
 		else if (Mesh.ncond(i) == 2) {//流入壁面
-			//dirichlet 前ステップの値を引き継ぐ
-			v[i] = UB[i];
+			//原則ポアズイユ流れに従う
+			//ポアズイユ流れの流入条件
+			
+			if (T.ntime() < 1.0) {//1s以下のとき
+				//u =( -0.5/C (y-y0)^2 + 0.5)*(1-cos(pi*t))
+				double u = ((-0.5 / C) * (Mesh.y(i) - y0) * (Mesh.y(i) - y0) + 0.5) * (1 - cos(PI * T.ntime()));
+				Vector2d in(u, 0);
+				v[i] = in;
+			}
+			else {//1s以降
+				//u =( -1/C (y-y0)^2 + 1)
+				double u = ((-1.0 / C) * (Mesh.y(i) - y0) * (Mesh.y(i) - y0) + 1.0);
+				Vector2d in(u, 0);
+				v[i] = in;
+			}
+
 		}
 		else if (Mesh.ncond(i) == 3) {//流出壁面
 			//流出方向 neumann 条件　接線方向は既定なし
@@ -481,7 +517,7 @@ void HSMAC_FEM::do_solution() {
 
 	for (int n = 1; n <= t.nend(); n++) {//1stepからスタート
 		auto step_start = std::chrono::high_resolution_clock::now();//1step計算時間 開始時刻取得
-
+		t.setn(n);//timeのステップ更新
 
 		Vp.euler_explicit(V, P, t, mesh, nsparam);//オイラー前進法による予測子算出
 		S.do_calculation(V, P, t, mesh, sorparam, BC);//同時緩和法による速度圧力修正

@@ -46,12 +46,15 @@ private:
 	double dt_;//時間刻み幅
 	int nend_;//終了ステップ
 	int nsample_;//サンプルステップ
+	int n_;//現在のステップ数
 	vector<double> t;
 	TimeP& tparam;
 public:
 	Time(TimeP& TP);
 	//ゲッタ
 	double ntime(int n);
+	double ntime();
+	void setn(int n);
 	void setup();
 	double dt();
 	int nend();
