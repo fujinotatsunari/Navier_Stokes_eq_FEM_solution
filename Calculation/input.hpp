@@ -57,7 +57,8 @@ public:
 	void setgoal();
 	void input_param();
 	void input_csv();
-	void input_mesh();
+	void input_dat();
+
 
 	double recomend_dt();//時間刻み幅の推奨
 	//初期条件の流速の大きさの最大値からクーラン数が

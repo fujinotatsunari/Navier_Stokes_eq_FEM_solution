@@ -153,7 +153,13 @@ void OutputData::output_csv() {
 	for (int j = 0; j < mesh.ynode(); j++) {
 		for (int i = 0; i < mesh.xnode(); i++) {
 			int np = i + mesh.xnode() * j;
-			outputfile1 << V[np][0] << ",";
+			
+			if (i == mesh.xnode() - 1) {
+				outputfile1 << V[np][0];
+			}
+			else {
+				outputfile1 << V[np][0] << ",";
+			}
 		}
 		outputfile1 << "\n";
 	}
@@ -162,7 +168,12 @@ void OutputData::output_csv() {
 	for (int j = 0; j < mesh.ynode(); j++) {
 		for (int i = 0; i < mesh.xnode(); i++) {
 			int np = i + mesh.xnode() * j;
-			outputfile2 << V[np][1] << ",";
+			if (i == mesh.xnode() - 1) {
+				outputfile2 << V[np][1];
+			}
+			else {
+				outputfile2 << V[np][1] << ",";
+			}
 		}
 		outputfile2 << "\n";
 	}
@@ -172,7 +183,13 @@ void OutputData::output_csv() {
 	for (int j = 0; j < mesh.yelem(); j++) {
 		for (int i = 0; i < mesh.xelem(); i++) {
 			int ie = i + mesh.xelem() * j;
-			outputfile3 << P[ie].v() << ",";
+			if (i == mesh.xelem() - 1) {
+				outputfile3 << P[ie].v();
+			}
+			else {
+				outputfile3 << P[ie].v() << ",";
+			}
+			
 		}
 		outputfile3 << "\n";
 	}
@@ -183,7 +200,12 @@ void OutputData::output_csv() {
 	for (int j = 0; j < mesh.ynode(); j++) {
 		for (int i = 0; i < mesh.xnode(); i++) {
 			int np = i + mesh.xnode() * j;
-			outputfile4 << mesh.ncond(np) << ",";
+			if (i == mesh.xnode() - 1) {
+				outputfile4 << mesh.ncond(np);
+			}
+			else {
+				outputfile4 << mesh.ncond(np) << ",";
+			}
 		}
 		outputfile4 << "\n";
 	}
@@ -192,37 +214,42 @@ void OutputData::output_csv() {
 	for (int j = 0; j < mesh.yelem(); j++) {
 		for (int i = 0; i < mesh.xelem(); i++) {
 			int ie = i + mesh.xelem() * j;
-			outputfile5 << mesh.scond(ie) << ",";
+			if (i == mesh.xelem() - 1) {
+				outputfile5 << mesh.scond(ie);
+			}
+			else {
+				outputfile5 << mesh.scond(ie) << ",";
+			}
 		}
 		outputfile5 << "\n";
 	}
 	outputfile5.close();
 
 	for (int i = 0; i < mesh.nnode(); i++) {
-		outputfile6 << mesh.x(i) << "," << mesh.y(i) << "," << "\n";//節点座標
+		outputfile6 << mesh.x(i) << "," << mesh.y(i) << "\n";//節点座標
 	}
 	outputfile6.close();
 
 	for (int ie = 0; ie < mesh.nelem(); ie++) {
-		outputfile7 << mesh.eX(ie) << "," << mesh.eY(ie) << "," << "\n";//要素重心座標
+		outputfile7 << mesh.eX(ie) << "," << mesh.eY(ie) << "\n";//要素重心座標
 	}
 	outputfile7.close();
 
 	for (int ie = 0; ie < mesh.nelem(); ie++) {
-		outputfile8 << mesh.i1(ie) << "," << mesh.i2(ie) << "," << mesh.i3(ie) << "," << mesh.i4(ie) << "," << "\n";//nbool1
+		outputfile8 << mesh.i1(ie) << "," << mesh.i2(ie) << "," << mesh.i3(ie) << "," << mesh.i4(ie) << "\n";//nbool1
 	}
 	outputfile8.close();
 
 	for (int ie = 0; ie < mesh.nelem(); ie++) {
-		outputfile9 << mesh.e1(ie) << "," << mesh.e2(ie) << "," << mesh.e3(ie) << "," << mesh.e4(ie) << "," << "\n";//nbool3
+		outputfile9 << mesh.e1(ie) << "," << mesh.e2(ie) << "," << mesh.e3(ie) << "," << mesh.e4(ie) << "\n";//nbool3
 	}
 	outputfile9.close();
 
-	outputfile10 << mesh.xb() << "," << mesh.xt() << "," << mesh.yb() << "," << mesh.yt() << "," << "," << "\n";
-	outputfile10 << mesh.dx() << "," << mesh.dy() << "," << "," << "," << "," << "\n";
-	outputfile10 << mesh.xelem() << "," << mesh.yelem() << "," << mesh.xnode() << "," << mesh.ynode() << "," << "," << "\n";
-	outputfile10 << mesh.nelem() << "," << mesh.nnode() << "," << "," << "," << "," << "\n";
-	outputfile10 << BC.getBCflagL() << "," << BC.getBCflagR() << "," << BC.getBCflagU() << "," << BC.getBCflagD() << "," << BC.getBCflagC() << "," << "\n";
+	outputfile10 << mesh.xb() << "," << mesh.xt() << "," << mesh.yb() << "," << mesh.yt() << "\n";
+	outputfile10 << mesh.dx() << "," << mesh.dy() << "\n";
+	outputfile10 << mesh.xelem() << "," << mesh.yelem() << "," << mesh.xnode() << "," << mesh.ynode() <<  "\n";
+	outputfile10 << mesh.nelem() << "," << mesh.nnode() << "\n";
+	outputfile10 << BC.getBCflagL() << "," << BC.getBCflagR() << "," << BC.getBCflagU() << "," << BC.getBCflagD() << "," << BC.getBCflagC() <<  "\n";
 	outputfile10.close();
 }
 void OutputData::output_dat() {
@@ -265,47 +292,47 @@ void OutputData::output_dat() {
 	//ofstream outputfile10(filename10);
 
 	for (int i = 0; i < mesh.nnode(); i++) {
-		outputfile1 << V[i][0] << "," << "\n";//x方向流速
+		outputfile1 << V[i][0] << "\n";//x方向流速
 	}
 	outputfile1.close();
 
 	for (int i = 0; i < mesh.nnode(); i++) {
-		outputfile2 << V[i][1] << "," << "\n";//y方向流速
+		outputfile2 << V[i][1] << "\n";//y方向流速
 	}
 	outputfile2.close();
 
 	for (int ie = 0; ie < mesh.nelem(); ie++) {
-		outputfile3 << P[ie][0] << "," << "\n";//圧力
+		outputfile3 << P[ie][0] << "\n";//圧力
 	}
 	outputfile3.close();
 
 	for (int i = 0; i < mesh.nnode(); i++) {
-		outputfile4 << mesh.ncond(i) << "," << "\n";//節点境界条件
+		outputfile4 << mesh.ncond(i) << "\n";//節点境界条件
 	}
 	outputfile4.close();
 
 	for (int ie = 0; ie < mesh.nelem(); ie++) {
-		outputfile5 << mesh.scond(ie) << "," << "\n";//要素条件
+		outputfile5 << mesh.scond(ie) << "\n";//要素条件
 	}
 	outputfile5.close();
 
 	for (int i = 0; i < mesh.nnode(); i++) {
-		outputfile6 << mesh.x(i) << "," << mesh.y(i) << "," << "\n";//節点座標
+		outputfile6 << mesh.x(i) << "," << mesh.y(i) << "\n";//節点座標
 	}
 	outputfile6.close();
 
 	for (int ie = 0; ie < mesh.nelem(); ie++) {
-		outputfile7 << mesh.eX(ie) << "," << mesh.eY(ie) << "," << "\n";//要素重心座標
+		outputfile7 << mesh.eX(ie) << "," << mesh.eY(ie) << "\n";//要素重心座標
 	}
 	outputfile7.close();
 
 	for (int ie = 0; ie < mesh.nelem(); ie++) {
-		outputfile8 << mesh.i1(ie) << "," << mesh.i2(ie) << "," << mesh.i3(ie) << "," << mesh.i4(ie) << "," << "\n";//nbool1
+		outputfile8 << mesh.i1(ie) << "," << mesh.i2(ie) << "," << mesh.i3(ie) << "," << mesh.i4(ie) << "\n";//nbool1
 	}
 	outputfile8.close();
 
 	for (int ie = 0; ie < mesh.nelem(); ie++) {
-		outputfile9 << mesh.e1(ie) << "," << mesh.e2(ie) << "," << mesh.e3(ie) << "," << mesh.e4(ie) << "," << "\n";//nbool3
+		outputfile9 << mesh.e1(ie) << "," << mesh.e2(ie) << "," << mesh.e3(ie) << "," << mesh.e4(ie) << "\n";//nbool3
 	}
 	outputfile9.close();
 

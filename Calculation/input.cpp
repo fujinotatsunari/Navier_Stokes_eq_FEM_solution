@@ -16,7 +16,8 @@ InputData::InputData()
 	cout << "Object generate : InputData" << endl;
 	setgoal();
 	input_param();
-	input_csv();
+	input_dat();
+	//input_csv();
 	//input_mesh();
 	cout << "input data: dx->" << nparam.getDx() << " " << " dy->" << nparam.getDy() << endl;
 	cout << "recomend time increments:  dt < " << recomend_dt() << endl;
@@ -197,85 +198,8 @@ void InputData::input_param() {
 	nparam.setLy(nparam.getYt() - nparam.getYb());
 
 }
-void InputData::input_mesh() {
-	string filename;
-	filename = goalpath + "/" + "mesh.dat";
-	ifstream inputfile(filename);
-	string line;
-	int count = 0;
-	int nodecount = 0;
 
-	if (inputfile.is_open()) {
-		while (getline(inputfile, line)) {
-			stringstream ss(line);
-			string value;
-			vector<string> v;
-			while (getline(ss, value, ',')) {
-				v.push_back(value);
-			}
-			if (count == 0 && nodecount == 0) {//1行目 nnode,nelem,,,,
-				nparam.setNnode(stoi(v[0]));
-				nparam.setNelem(stoi(v[1]));
-				nodecount = 1;
-			}
-			if (nodecount == 1) {//2行目から座標データの終端まで
-				if (stoi(v[0]) < nparam.getNnode()) {
-					x.push_back(stod(v[1]));
-					y.push_back(stod(v[2]));
-				}
-				if (stoi(v[0]) == nparam.getNnode() - 1) {
-					nodecount = 2;
-				}
-			}
-			if (nodecount == 2) {
-				if (stoi(v[0]) < nparam.getNelem()) {//nbool1データの終端まで
-					i1.push_back(stoi(v[1]));
-					i2.push_back(stoi(v[2]));
-					i3.push_back(stoi(v[3]));
-					i4.push_back(stoi(v[4]));
-				}
-				if (stoi(v[0]) == nparam.getNelem() - 1) {
-					nodecount = 3;
-				}
-			}
-			if (nodecount == 3) {
-				if (stoi(v[0]) < nparam.getNelem()) {//nbool3データの終端まで
-					e1.push_back(stoi(v[1]));
-					e2.push_back(stoi(v[2]));
-					e3.push_back(stoi(v[3]));
-					e4.push_back(stoi(v[4]));
-				}
-				if (stoi(v[0]) == nparam.getNelem() - 1) {
-					nodecount = 4;
-				}
-			}
-		}
-		inputfile.close();
-	}
-	else {
-		cout << "ファイルが開けませんでした" << endl;
-		exit(-1);
-	}
-
-	nbool1.resize(nparam.getNelem());
-	nbool3.resize(nparam.getNelem());
-	for (int ie = 0; ie < nparam.getNelem(); ie++) {
-		nbool1[ie].resize(4);
-		nbool3[ie].resize(4);
-	}
-	for (int ie = 0; ie < nparam.getNelem(); ie++) {
-		nbool1[ie][0] = i1[ie];
-		nbool1[ie][1] = i2[ie];
-		nbool1[ie][2] = i3[ie];
-		nbool1[ie][3] = i4[ie];
-
-		nbool3[ie][0] = e1[ie];
-		nbool3[ie][1] = e2[ie];
-		nbool3[ie][2] = e3[ie];
-		nbool3[ie][3] = e4[ie];
-	}
-}
-void InputData::input_csv() {
+void InputData::input_dat() {
 	
 	int count = 0;
 	//1ファイル1配列

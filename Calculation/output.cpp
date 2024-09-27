@@ -172,10 +172,20 @@ void OutputData::output_time_csv(int N) {
 	for (int j = 0; j < mesh.ynode(); j++) {
 		for (int i = 0; i < mesh.xnode(); i++) {
 			int np = i + mesh.xnode() * j;
-			outputfile1 << V[np][0] << ",";
-			outputfile2 << V[np][1] << ",";
-			outputfile4 << V[np].norm() << ",";
-			outputfile5 << nodeP[np].v() << ",";
+			if (i == mesh.xnode() - 1) {
+				outputfile1 << V[np][0];
+				outputfile2 << V[np][1];
+				outputfile4 << V[np].norm();
+				outputfile5 << nodeP[np].v();
+			}
+			else {
+				outputfile1 << V[np][0] << ",";
+				outputfile2 << V[np][1] << ",";
+				outputfile4 << V[np].norm() << ",";
+				outputfile5 << nodeP[np].v() << ",";
+			}
+			
+
 		}
 		outputfile1 << "\n";
 		outputfile2 << "\n";
@@ -186,7 +196,12 @@ void OutputData::output_time_csv(int N) {
 	for (int j = 0; j < mesh.yelem(); j++) {
 		for (int i = 0; i < mesh.xelem(); i++) {
 			int ie = i + mesh.xelem() * j;
-			outputfile3 << P[ie].v() << ",";
+			if (i == mesh.xelem() - 1) {
+				outputfile3 << P[ie].v();
+			}
+			else {
+				outputfile3 << P[ie].v() << ",";
+			}
 		}
 		outputfile3 << "\n";
 	}
@@ -226,13 +241,13 @@ void OutputData::output_ghia(int N) {
 	ofstream outputfile1(filename1);
 	ofstream outputfile2(filename2);
 	for (int i = 0; i < ghiav.size(); i++) {
-		outputfile1 << ghiax[i] << "," << ghiav[i] << "," << "\n";
+		outputfile1 << ghiax[i] << "," << ghiav[i] << "\n";
 	}
 	outputfile1.close();
 	ghiax.clear();
 	ghiav.clear();
 	for (int j = 0; j < ghiau.size(); j++) {
-		outputfile2 << ghiay[j] << "," << ghiau[j] << "," << "\n";
+		outputfile2 << ghiay[j] << "," << ghiau[j] << "\n";
 	}
 	outputfile2.close();
 	ghiay.clear();
