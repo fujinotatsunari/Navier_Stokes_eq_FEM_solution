@@ -141,7 +141,7 @@ void Predictor::euler_explicit(Velocity2d& v, Pressure& p, Time& T, Mesh2d& Mesh
 	//流入境界での処理
 	std::vector<double> inlet;//流入領域
 	double y0b, y0t, y0L, y0;//流入下端,上端,流入領域長さ,領域中点
-
+	double C = 0;
 	for (int j = 0; j < Mesh.ynode(); j++) {
 		for (int i = 0; i < Mesh.xnode(); i++) {
 			int np = i + Mesh.xnode() * j;
@@ -150,11 +150,15 @@ void Predictor::euler_explicit(Velocity2d& v, Pressure& p, Time& T, Mesh2d& Mesh
 			}
 		}
 	}
-	y0b = inlet[0];
-	y0t = inlet.back();
-	y0L = y0t - y0b;
-	y0 = (y0b + y0t) / 2;
-	double C = y0b * y0b - 2 * y0b * y0 + y0 * y0;
+	
+	if (inlet.size() != 0) {
+		y0b = inlet[0];
+		y0t = inlet.back();
+		y0L = y0t - y0b;
+		y0 = (y0b + y0t) / 2;
+		C = y0b * y0b - 2 * y0b * y0 + y0 * y0;
+	}
+	
 	
 	for (int ie = 0; ie < Mesh.nelem(); ie++) {
 

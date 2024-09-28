@@ -56,7 +56,7 @@ public:
 	void setdata();
 	void setgoal();
 	void input_param();
-	void input_csv();
+	//void input_csv();
 	void input_dat();
 
 
