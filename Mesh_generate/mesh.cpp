@@ -819,26 +819,19 @@ void SquarePillarMesh2d::generate() {
 	for (int j = 0; j < ynode_; j++) {
 		for (int i = 0; i < xnode_; i++) {
 			int np = i + xnode_ * j;
-
-			if (i != 0 || i != xnode_ - 1) {
-				if (j != 0 || j != ynode_ - 1) {
-					if (((x(np) >= (ox - hx)) && (y(np) >= (oy - hy)))
-						|| ((x(np) >= (ox - hx)) && (y(np) <= (oy + hy)))
-						|| ((x(np) <= (ox + hx)) && (y(np) >= (oy - hy)))
-						|| ((x(np) <= (ox + hx)) && (y(np) <= (oy + hy)))) {
-						//角柱と判定する
-						ncond_[np] = 1;//剛体内部
-
-						if (x(np - 1) < ox - hx || x(np + 1) > ox + hx || y(np - xnode_) < oy - hy || y(np + xnode_) > oy + hy) {
-							//剛体表面
-							ncond_[np] = Bcond_.getBCflagC();
-						}
-					}
+			if (inpillar(x(np), y(np))) {//npのxy座標が角柱内にあるか判定
+				ncond_[np] = 1;
+				if (insurface(np)) {
+					ncond_[np] = Bcond_.getBCflagC();
 				}
 			}
 			
 		}
 	}
+	
+	
+	
+
 
 	for (int ie = 0; ie < nelem_; ie++) {
 		scond_[ie] = 0;
@@ -861,4 +854,58 @@ void SquarePillarMesh2d::generate() {
 	}
 
 
+}
+bool SquarePillarMesh2d::inpillar(double x, double y) {
+
+	if (inpillarx(x) && inpillary(y)) {//x,y座標ともに角柱の範囲内
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+bool SquarePillarMesh2d::inpillarx(double x) {
+	double hxb = ox - hx / 2;//角柱左端
+	double hxt = ox + hx / 2;//角柱右端
+
+	if (x >= hxb && x <= hxt) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+bool SquarePillarMesh2d::inpillary(double y) {
+	double hyb = oy - hy / 2;//角柱下端
+	double hyt = oy + hy / 2;//角柱上端
+
+	if (y >= hyb && y <= hyt) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+bool SquarePillarMesh2d::insurface(int np) {
+	int left = np - 1;
+	int right = np + 1;
+	int up = np + xnode();
+	int down = np - xnode();
+	if (inpillar(x(np), y(np))) {
+		if (   inpillar(x(left), y(left)) 
+			&& inpillar(x(right), y(right)) 
+			&& inpillar(x(up), y(up))
+			&& inpillar(x(down), y(down))) {
+			//上下左右すべての点が角柱の中　->  角柱表面の点ではない
+			return false;
+		}
+		else {
+			//上下左右いずれかの点が角柱の外　-> 角柱表面の点
+			return true;
+		}
+	}
+	else {
+		cout << "npは角柱内の点でない insurface()" << endl;
+	}
+	
 }

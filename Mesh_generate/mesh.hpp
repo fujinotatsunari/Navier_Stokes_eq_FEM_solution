@@ -170,6 +170,10 @@ private:
 public:
 	SquarePillarMesh2d(NodeP& NP, Boundarycond& BC);
 	void generate()override;//角柱流れ用のグリッド
+	bool inpillarx(double x);//x座標が角柱内か->  ox-hx/2 <= x <= ox+hx/2
+	bool inpillary(double y);//y座標が角柱内か->  oy-hy/2 <= x <= oy+hy/2
+	bool inpillar(double x, double y);//座標が角柱内か
+	bool insurface(int np);//npが剛体表面の点か
 };
 
 /*
