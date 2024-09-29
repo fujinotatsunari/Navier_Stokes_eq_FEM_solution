@@ -696,8 +696,9 @@ SquarePillarMesh2d::SquarePillarMesh2d(NodeP& NP, Boundarycond& BC)
 	cin >> hx;
 	cout << "角柱のy方向長さ hy->";
 	cin >> hy;
+	ox = xb() + Lx() / 5;
 	oy = yb() + Ly() / 2;
-	ox = oy;
+	cout << "角柱中心座標 ox-> " << ox << " , oy-> " << oy << endl;
 	
 
 }
