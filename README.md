@@ -3,11 +3,11 @@
 説明:
 Mesh_generate:(C++)
 計算領域と計算モデル,初期条件を指定し, 作成します.
-モデルはcavity流れ(cavity), backstep流れ(backstep),角柱周り流れ(pillar)の3つがチュートリアルとして提供されます.(pillarがうまく動きません. 現在修正中)
+チュートリアルのモデルはcavity流れ(cavity), backstep流れ(backstep),角柱周り流れ(pillar)の3つです.
 
 calculation:(C++)
 作成したmeshデータからNavier-Stokes方程式を有限要素法で数値的に解きます.
-スキームはHSMAC法, 直接完全陰解法(未実装), 線形化直接完全陰解法です.
+スキームはHSMAC法です.
 
 viewer:(Python)
 calculationで出力されたデータ(U,V,Pnode,magnitude)をコンター図(Pnode, magnitude), ベクトル場図(U,V), 流線図(U,V)にして可視化します.
